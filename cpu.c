@@ -7,13 +7,13 @@ short int _(short int addr) { //alterar mapping apenas para escrita
 
 void cpu(short int pc_addr, State *st) {
     st->pc = 0;
-    short int addr;
+    short int addr, temp;
     unsigned char opcode;
     unsigned char value1, value2;
 
     while (1) {
-        OPCODE(opcode); //OPCODES: http://6502.org/tutorials/6502opcodes.html#BRA
-        switch (opcode) {  //MODE: Syntax 
+        OP_CODE(opcode); //OPCODES: http://6502.org/tutorials/6502opcodes.html#BRA
+        switch (opcode) {  //MODE: Syntax
             //ADC
             case 0x69: //Imm: ADC #$44
                 OP_IMM(value1); ADC(value1); break;
@@ -28,9 +28,9 @@ void cpu(short int pc_addr, State *st) {
             case 0x79: //Abs, Y: ADC $FF00, Y
                 OP_ABS(value1, st->y); ADC(value1); break;
             case 0x61: //Ind, X: ADC ($FF,X)
-                break;
+                OP_INDIR_PRE(value1, st->x); ADC(value1); break;
             case 0x71: //Ind, Y: ADC ($FF), Y
-                break;
+                OP_INDIR_POS(value1, st->y); ADC(value1); break;
 
             //AND
             case 0x29: //Imm: AND #$44
@@ -68,7 +68,7 @@ void cpu(short int pc_addr, State *st) {
 
             //BMI
             case 0x30: break;
-            
+
             //BNE
             case 0xD0: break;
 
@@ -105,7 +105,7 @@ void cpu(short int pc_addr, State *st) {
             case 0xD9: break;
             case 0xC1: break;
             case 0xD1: break;
-            
+
             //CPX
             case 0xE0: break;
             case 0xE4: break;
@@ -267,8 +267,8 @@ void cpu(short int pc_addr, State *st) {
             case 0x8E: break;
 
             //STY
-            case 0x84: break;  
-            case 0x94: break;  
+            case 0x84: break;
+            case 0x94: break;
             case 0x8C: break;
 
             //TAX

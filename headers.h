@@ -4,6 +4,4 @@ typedef struct State {
     unsigned char memory[65536];
 } State;
 
-void cpu(short int *rom_addr);
-
-
+void cpu(short int pc_addr, State *st);
