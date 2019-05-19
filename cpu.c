@@ -7,9 +7,9 @@ short int _(short int addr) { //alterar mapping apenas para escrita
 
 void cpu(short int pc_addr, State *st) {
     st->pc = 0;
-    short int addr, temp;
+    short int addr, eaddr;
     unsigned char opcode;
-    unsigned char value1, value2;
+    unsigned char value1, value2, result;
 
     while (1) {
         OP_CODE(opcode); //OPCODES: http://6502.org/tutorials/6502opcodes.html#BRA
@@ -34,33 +34,48 @@ void cpu(short int pc_addr, State *st) {
 
             //AND
             case 0x29: //Imm: AND #$44
-                break;
+                OP_IMM(value1); AND(value1); break;
             case 0x25: //ZP: AND $44
-                break;
+                OP_ZP(value1, 0); AND(value1); break;
             case 0x35: //ZP, X: AND $FF, X
-                break;
+                OP_ZP(value1, st->x); AND(value1); break;
             case 0x2D: //ABS: AND $FF00
-                break;
-            case 0x3D: break;
-            case 0x39: break;
-            case 0x21: break;
-            case 0x31: break;
+                OP_ABS(value1, 0); AND(value1); break;
+            case 0x3D: // ABS X
+                OP_ABS(value1, st->x); AND(value1); break;
+            case 0x39: // ABS Y
+                OP_ABS(value1, st->y); AND(value1); break;
+            case 0x21: break; // INDIR X (pre)
+                OP_INDIR_PRE(value1, st->x); AND(value1); break;
+            case 0x31: break; // INDIR Y (pos)
+                OP_INDIR_POS(value1, st->y); AND(value1);
 
             //ASL
-            case 0x0A: break;
-            case 0x06: break;
-            case 0x16: break;
+            case 0x0A:
+                ASL(st->a, st->a); break;
+            case 0x06:
+                OP_ZP(value1, 0); ASL(MEM_AT(eaddr), value1); break;
+            case 0x16:
+                OP_ZP(value1, st->x); ASL(MEM_AT(eaddr), value1); break;
             case 0x0E: break;
+                OP_ABS(value1, 0); ASL(MEM_AT(eaddr), value1); break;
             case 0x1E: break;
+                OP_ABS(value1, st->x); ASL(MEM_AT(eaddr), value1); break;
 
             //BCC
-            case 0x90: break;
+            case 0x90:
+                if (GET(CARRY) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
+                break;
 
             //BCS
-            case 0xB0: break;
+            case 0xB0:
+                if (GET(CARRY) == 1) LEA_REL(st->pc, MEM_AT(st->pc));
+                break;
 
             //BEQ
-            case 0xF0: break;
+            case 0xF0:
+                if (GET(ZERO) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
+                break;
 
             //BIT
             case 0x24: break;
