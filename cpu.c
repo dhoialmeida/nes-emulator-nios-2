@@ -481,21 +481,25 @@ void cpu(short int pc_addr, State *st) {
             //TAX
             case 0xAA: log("TAX");
                 TRN(st->x, st->a);
+                SET(ZERO, !st->x);
                 break;
 
             //TAY
             case 0xA8: log("TAY");
                 TRN(st->y, st->a);
+                SET(ZERO, !st->y);
                 break;
 
             //TSX
             case 0xBA: log("TSX");
                 TRN(st->x, st->sp);
+                SET(ZERO, !st->x);
                 break;
 
             //TXA
             case 0x8A: log("TXA");
                 TRN(st->a, st->x);
+                SET(ZERO, !st->a);
                 break;
 
             //TXS
@@ -506,6 +510,7 @@ void cpu(short int pc_addr, State *st) {
             //TYA
             case 0x98: log("TYA");
                 TRN(st->a, st->y);
+                SET(ZERO, !st->a);
                 break;
         }
 
