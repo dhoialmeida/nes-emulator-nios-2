@@ -12,3 +12,5 @@ typedef struct PPU {
 
 
 void cpu(short int pc_addr, State *st);
+
+short int romRead(unsigned char* cart, State* st, PPU* ppu);
