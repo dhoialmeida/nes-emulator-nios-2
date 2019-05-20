@@ -2,6 +2,7 @@
 
 int main(void) {
     State st;
-    char *ROM_START = 0x123456576;
-    cpu(ROM_START, &st);
+    PPU ppu;
+    unsigned char *jogo = 0x123456576;
+    cpu(romRead(jogo, &st, &ppu), &st);
 }
