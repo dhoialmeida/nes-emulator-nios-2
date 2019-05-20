@@ -83,3 +83,6 @@ setCarryOverflow = setada para falso caso o loop principal não deva atualizar C
 
 // Subtrai value ao acumulador, salva em dest
 #define SBC(value) result = SUB(st->a, value, GET(CARRY)); st->a = result
+
+// Transfere de registrador 1 para 2
+#define TRN(dest, source) source = dest

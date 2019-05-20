@@ -278,7 +278,7 @@ void cpu(short int pc_addr, State *st) {
                 OP_ABS(value1, 0); st->pc = eaddr;
                 break;
             case 0x6C: log("JMP $FFFF Indir");
-                OP_INDIR(value1, 0); st->pc = eaddr;
+                OP_INDIR(value1); st->pc = eaddr;
                 break;
 
             //JSR
@@ -479,22 +479,34 @@ void cpu(short int pc_addr, State *st) {
             case 0x8C: break;
 
             //TAX
-            case 0xAA: break;
+            case 0xAA: log("TAX");
+                TRN(st->x, st->a);
+                break;
 
             //TAY
-            case 0xA8: break;
+            case 0xA8: log("TAY");
+                TRN(st->y, st->a);
+                break;
 
             //TSX
-            case 0xBA: break;
+            case 0xBA: log("TSX");
+                TRN(st->x, st->sp);
+                break;
 
             //TXA
-            case 0x8A: break;
+            case 0x8A: log("TXA");
+                TRN(st->a, st->x);
+                break;
 
             //TXS
-            case 0x9A: break;
+            case 0x9A: log("TXS");
+                TRN(st->sp, st->x);
+                break;
 
             //TYA
-            case 0x98: break;
+            case 0x98: log("TYA");
+                TRN(st->a, st->y);
+                break;
         }
 
         if (setCarryOverflow) {
