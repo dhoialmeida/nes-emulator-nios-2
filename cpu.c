@@ -68,13 +68,13 @@ void cpu(short int pc_addr, State *st) {
                 break;
 
             //BCS
-            case 0xB0: log("BCS $FF");
-                if (GET(CARRY) == 1) LEA_REL(st->pc, MEM_AT(st->pc));
+            case 0xB0:
+                if (GET(CARRY) != 0) LEA_REL(st->pc, MEM_AT(st->pc));
                 break;
 
             //BEQ
-            case 0xF0: log("BEQ $FF");
-                if (GET(ZERO) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
+            case 0xF0:
+                if (GET(ZERO) != 0) LEA_REL(st->pc, MEM_AT(st->pc));
                 break;
 
             //BIT
@@ -82,25 +82,37 @@ void cpu(short int pc_addr, State *st) {
             case 0x2C: break;
 
             //BMI
-            case 0x30: break;
+            case 0x30: log("BMI $FF");
+                if (GET(NEGATIVE) != 0) LEA_REL(st->pc, MEM_AT(st->pc));
+                break;
 
             //BNE
-            case 0xD0: break;
+            case 0xD0: log("BNE $FF");
+                if (GET(ZERO) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
+                break;
 
             //BPL
-            case 0x10: break;
+            case 0x10: log("BPL $FF");
+                if (GET(NEGATIVE) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
+                break;
 
             //BRK
             case 0x00: break;
 
             //BVC
-            case 0x50: break;
+            case 0x50: log("BVC $FF");
+                if (GET(OVERFLOW) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
+                break;
 
             //BVS
-            case 0x70: break;
+            case 0x70: log("BVS $FF");
+                if (GET(OVERFLOW) != 0) LEA_REL(st->pc, MEM_AT(st->pc));
+                break;
 
             //CLC
-            case 0x18: break;
+            case 0x18: log("CLC");
+                SET(CARRY, 0);
+                break;
 
             //CLD
             case 0xD8: break;
