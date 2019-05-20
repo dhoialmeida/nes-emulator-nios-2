@@ -15,65 +15,65 @@ void cpu(short int pc_addr, State *st) {
         OP_CODE(opcode); //OPCODES: http://6502.org/tutorials/6502opcodes.html#BRA
         switch (opcode) {  //MODE: Syntax
             //ADC
-            case 0x69: //Imm: ADC #$44
+            case 0x69: log("ADC #$44");
                 OP_IMM(value1); ADC(value1); break;
-            case 0x65: //ZP: ADC $FF
+            case 0x65: log("ADC $FF");
                 OP_ZP(value1, 0); ADC(value1); break;
-            case 0x75: //ZP, X: ADC $FF, X
+            case 0x75: log("ADC $FF, X");
                 OP_ZP(value1, st->x); ADC(value1); break;
-            case 0x6D: //Abs: ADC $FF00
+            case 0x6D: log("ADC $FFFF");
                 OP_ABS(value1, 0); ADC(value1); break;
-            case 0x7D: //Abs, X: ADC $FF00, X
+            case 0x7D: log("ADC $FFFF, X");
                 OP_ABS(value1, st->x); ADC(value1); break;
-            case 0x79: //Abs, Y: ADC $FF00, Y
+            case 0x79: log("ADC $FFFF, Y");
                 OP_ABS(value1, st->y); ADC(value1); break;
-            case 0x61: //Ind, X: ADC ($FF,X)
+            case 0x61: log("ADC ($FF,X)");
                 OP_INDIR_PRE(value1, st->x); ADC(value1); break;
-            case 0x71: //Ind, Y: ADC ($FF), Y
+            case 0x71: log("ADC ($FF), Y");
                 OP_INDIR_POS(value1, st->y); ADC(value1); break;
 
             //AND
-            case 0x29: //Imm: AND #$44
+            case 0x29: log("AND #$44");
                 OP_IMM(value1); AND(value1); break;
-            case 0x25: //ZP: AND $44
+            case 0x25: log("AND $44");
                 OP_ZP(value1, 0); AND(value1); break;
-            case 0x35: //ZP, X: AND $FF, X
+            case 0x35: log("AND $FF, X");
                 OP_ZP(value1, st->x); AND(value1); break;
-            case 0x2D: //ABS: AND $FF00
+            case 0x2D: log("AND $FFFF");
                 OP_ABS(value1, 0); AND(value1); break;
-            case 0x3D: // ABS X
+            case 0x3D: log("AND $FFFF, X");
                 OP_ABS(value1, st->x); AND(value1); break;
-            case 0x39: // ABS Y
+            case 0x39: log("AND $FFFF, Y");
                 OP_ABS(value1, st->y); AND(value1); break;
-            case 0x21: break; // INDIR X (pre)
+            case 0x21: log("AND ($ff, X)");
                 OP_INDIR_PRE(value1, st->x); AND(value1); break;
-            case 0x31: break; // INDIR Y (pos)
+            case 0x31: log("AND ($FF), Y");
                 OP_INDIR_POS(value1, st->y); AND(value1);
 
             //ASL
-            case 0x0A:
+            case 0x0A: log("ASL A");
                 ASL(st->a, st->a); break;
-            case 0x06:
+            case 0x06: log("ASL $44");
                 OP_ZP(value1, 0); ASL(MEM_AT(eaddr), value1); break;
-            case 0x16:
+            case 0x16: log("ASL $FF, X");
                 OP_ZP(value1, st->x); ASL(MEM_AT(eaddr), value1); break;
-            case 0x0E: break;
+            case 0x0E: log("ASL $FFFF");
                 OP_ABS(value1, 0); ASL(MEM_AT(eaddr), value1); break;
-            case 0x1E: break;
+            case 0x1E: log("ASL $FFFF, X");
                 OP_ABS(value1, st->x); ASL(MEM_AT(eaddr), value1); break;
 
             //BCC
-            case 0x90:
+            case 0x90: log("BCC $FF");
                 if (GET(CARRY) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
                 break;
 
             //BCS
-            case 0xB0:
+            case 0xB0: log("BCS $FF");
                 if (GET(CARRY) == 1) LEA_REL(st->pc, MEM_AT(st->pc));
                 break;
 
             //BEQ
-            case 0xF0:
+            case 0xF0: log("BEQ $FF");
                 if (GET(ZERO) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
                 break;
 
