@@ -12,7 +12,7 @@ short int romRead(unsigned char* cart, State* st, PPU* ppu){
 
     if(prgSize == 16000){
         prgStart = 0xC000;
-    } else if {
+    } else {
         prgStart = 0x8000;
     }
     prgWriter = prgStart;
