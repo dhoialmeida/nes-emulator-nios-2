@@ -1,4 +1,4 @@
-#define log(...) printf(__VA_ARGS__)
+#define log(x) printf(x "\n")
 
 typedef struct State {
     short int pc, sp;
