@@ -100,8 +100,10 @@ void cpu(short int pc_addr, State *st) {
                 break;
 
             //BIT
-            case 0x24: break;
-            case 0x2C: break;
+            case 0x24:
+                 break;
+            case 0x2C:
+                 break;
 
             //BMI
             case 0x30: log("BMI $FF");
@@ -119,7 +121,8 @@ void cpu(short int pc_addr, State *st) {
                 break;
 
             //BRK
-            case 0x00: break;
+            case 0x00:
+                 break;
 
             //BVC
             case 0x50: log("BVC $FF");
@@ -421,62 +424,101 @@ void cpu(short int pc_addr, State *st) {
                 break;
 
             //ROL
-            case 0x2A: break;
-            case 0x26: break;
-            case 0x36: break;
-            case 0x2E: break;
-            case 0x3E: break;
+            case 0x2A: 
+                break;
+            case 0x26: 
+                break;
+            case 0x36: 
+                break;
+            case 0x2E: 
+                break;
+            case 0x3E: 
+                break;
 
             //ROR
-            case 0x6A: break;
-            case 0x66: break;
-            case 0x76: break;
-            case 0x6E: break;
-            case 0x7E: break;
+            case 0x6A: 
+                break;
+            case 0x66: 
+                break;
+            case 0x76:
+                break;
+            case 0x6E: 
+                break;
+            case 0x7E: 
+                break;
 
             //RTI
-            case 0x40: break;
+            case 0x40: 
+                break;
 
             //RTS
-            case 0x60: break;
+            case 0x60: 
+                break;
 
             //SBC
-            case 0xE9: break;
-            case 0xE5: break;
-            case 0xF5: break;
-            case 0xED: break;
-            case 0xFD: break;
-            case 0xF9: break;
-            case 0xE1: break;
-            case 0xF1: break;
+            case 0xE9: 
+                break;
+            case 0xE5: 
+                break;
+            case 0xF5: 
+                break;
+            case 0xED: 
+                break;
+            case 0xFD: 
+                break;
+            case 0xF9: 
+                break;
+            case 0xE1: 
+                break;
+            case 0xF1: 
+                break;
 
             //SEC
-            case 0x38: break;
+            case 0x38: log("SEC"); 
+                SET(CARRY, 1);
+                break;
 
             //SED
-            case 0xF8: break;
+            case 0xF8: log("SET");
+                SET(DECIMAL, 1);
+                break;
 
             //SEI
-            case 0x78: break;
+            case 0x78: log("SEI");
+                SET(INTERRUPT_DISABLE, 1);
+                break;
 
             //STA
-            case 0x85: break;
-            case 0x95: break;
-            case 0x8D: break;
-            case 0x9D: break;
-            case 0x99: break;
-            case 0x81: break;
-            case 0x91: break;
+            case 0x85: 
+                break;
+            case 0x95: 
+                break;
+            case 0x8D: 
+                break;
+            case 0x9D:  
+                break;
+            case 0x99:  
+                break;
+            case 0x81: 
+                break;
+            case 0x91:  
+                break;
 
             //STX
-            case 0x86: break;
-            case 0x96: break;
-            case 0x8E: break;
+            case 0x86: 
+                break;
+            case 0x96:
+                break;
+            case 0x8E:
+                 break;
 
             //STY
-            case 0x84: break;
-            case 0x94: break;
-            case 0x8C: break;
+            case 0x84:
+                break;
+            case 0x94:
+                break;
+            case 0x8C:
+                break;
 
             //TAX
             case 0xAA: log("TAX");
