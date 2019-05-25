@@ -6,7 +6,7 @@ Variáveis externas utilizadas: (podem ser redefinidas com #define antes de incl
 st = ponteiro para struct de status
 result = resultado da operação (que pode ser checado no fim para setar as flags), 16 bits
 eaddr = endereço efetivo ("real") do último value carregado por uma das operações OP_X
-setCarryOverflow = setada para falso caso o loop principal não deva atualizar CARRY/OVERFLOW
+setStatus = setada para falso caso o loop principal não deva atualizar o registrador de status baseado em result
 */
 
 // Obtém o value de memória salvo no endereço x
@@ -26,28 +26,29 @@ setCarryOverflow = setada para falso caso o loop principal não deva atualizar C
 // (endereçamento absoluto, com indice)
 #define OP_ABS(var, idx) eaddr = MEM_AT16(st->pc) + idx; var = MEM_AT(eaddr); st->pc += 2
 // (endereçamento zero page, com indice)
-#define OP_ZP(var, idx) eaddr = MEM_AT(st->pc) + idx; var = MEM_AT(eaddr); st->pc++
+#define OP_ZP(var, idx) eaddr = (char) (MEM_AT(st->pc) + idx); var = MEM_AT(eaddr); st->pc++
 // (enderçamento indireto, addr = 16 bits)
 #define OP_INDIR(addr) eaddr = MEM_AT16(st->pc); eaddr = MEM_AT16(eaddr); addr = MEM_AT16(eaddr); st->pc += 2
 // (endereçamento indireto, prefixado)
 #define OP_INDIR_PRE(var, x) eaddr = MEM_AT(st->pc); eaddr = (char) (eaddr + x); eaddr = MEM_AT16(eaddr); var = MEM_AT(eaddr); st->pc += 1
 // (endereçamento indireto, posfixado)
-#define OP_INDIR_PRE(var, y) eaddr = MEM_AT(st->pc); eaddr = MEM_AT16(eaddr); eaddr += y; var = MEM_AT(eaddr); st->pc++
+#define OP_INDIR_POS(var, y) eaddr = MEM_AT(st->pc); eaddr = MEM_AT16(eaddr); eaddr += y; var = MEM_AT(eaddr); st->pc++
 
 // Salva o endereço efetivo em addr, a partir do endereço relativo rel_addr
-#define LEA_REL(addr, rel_addr) (st->pc + (signed char) (rel_addr))
+#define LEA_REL(addr, rel_addr) addr = (st->pc + (signed char) (rel_addr))
 
 // === Bits de status
-
 #define CARRY 0
 #define ZERO 1
 #define INTERRUPT_DISABLE 2
 #define DECIMAL 3
+#define BREAK 4
 #define OVERFLOW 6
 #define NEGATIVE 7
+
 // Seta o bit de status correspondente
 #define SET(bit, value) st->p = (st->p & ~(1 << bit)) | ((value) << bit)
-// Obtem o bit de status correspondente (0 se o bit for 0, outro value caso contrário)
+// Obtem o bit de status correspondente
 #define GET(bit) !!(st->p & (1 << bit))
 // Efetua a - b - c
 #define SUB(a, b, c) (a) - (b) - (c)
@@ -60,6 +61,11 @@ setCarryOverflow = setada para falso caso o loop principal não deva atualizar C
 #define AND(value) st->a &= value; result = st->a
 // Shift left one bit (dest, source)
 #define ASL(dest, source) result = (source << 1); dest = result
+// Efeuta a operação BIT
+#define BIT(value) setStatus = 0; result = st->a & value; \
+    SET(ZERO, result == 0); \
+    SET(OVERFLOW, (value & 64) >> 6); \
+    SET(NEGATIVE, (value & 128) >> 7)
 // Compara value ao acumulador
 #define CMP(value) result = SUB(st->a, (value), 0)
 // Compara value a x
@@ -75,14 +81,20 @@ setCarryOverflow = setada para falso caso o loop principal não deva atualizar C
 // Carrega value no dest
 #define LDA(dest, source) result = source; dest = source
 // Shift left one bit (dest, source)
-#define LSR(dest, source) setCarryOverflow = 0; SET(CARRY, source & 0x1); result = (source >> 1); result += (source & 0x1); dest = result
+#define LSR(dest, source) setStatus = 0; SET(CARRY, source & 0x1); result = (source >> 1); result += (source & 0x1); dest = result
 // Or com acumulador
 #define ORA(value) result = st->a | (value); st->a = result
 // Rotate left
-#define ROL(dest, value) setCarryOverflow = 0; SET(CARRY, value >> 7); dest = ((value) << 1) | ((value) >> 7); result = dest;
-
-// Subtrai value ao acumulador, salva em dest
-#define SBC(value) result = SUB(st->a, value, GET(CARRY)); st->a = result
-
+#define ROL(dest, value) setStatus = 0; result = (value >> 7) & 1; dest = ((value) << 1) | GET(CARRY); SET(CARRY, result); result = dest
+// Rotate right
+#define ROR(dest, value) setStatus = 0; result = (value & 1); dest = ((value) >> 1) | (GET(CARRY) << 7); SET(CARRY, result); result = dest
+// Subtrai value ao acumulador
+#define SBC(value) result = SUB(st->a, value, !GET(CARRY)); st->a = result
+// Salva acumulador na memória
+#define STA(addr) MEM_AT(eaddr) = st->a
+// Salva X na memória
+#define STX(addr) MEM_AT(eaddr) = st->x
+// Salva Y na memória
+#define STY(addr) MEM_AT(eaddr) = st->y
 // Transfere de registrador 1 para 2
 #define TRN(dest, source) source = dest
