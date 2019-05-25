@@ -7,8 +7,8 @@ short int romRead(unsigned char* cart, State* st, PPU* ppu){
 
     // TODO: MAPPER
 
-    short int prgStart;
-    short int prgWriter;
+    unsigned short int prgStart;
+    unsigned short int prgWriter;
 
     if(prgSize == 16000){
         prgStart = 0xC000;
@@ -23,6 +23,6 @@ short int romRead(unsigned char* cart, State* st, PPU* ppu){
     for(int i = 0; i < VSize; i++){
         ppu->memory[i] = cart[idx+i];
     }
-    
+
     return prgStart;
 }

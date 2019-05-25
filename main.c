@@ -2,7 +2,7 @@
 #include "headers.h"
 #define MAX_SIZE 100000
 
-size_t read_file(char *name, char *buffer, size_t size) {
+size_t read_file(char *name, unsigned char *buffer, size_t size) {
     FILE *f = fopen(name, "r");
     if (f != NULL) {
         return fread(buffer, sizeof(char), size, f);
