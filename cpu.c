@@ -7,7 +7,7 @@ short int _(short int addr) { //alterar mapping apenas para escrita
 }
 
 void cpu(short int pc_addr, State *st) {
-    st->pc = 0;
+    st->pc = pc_addr;
     short signed int addr, eaddr, result;
     unsigned char opcode;
     unsigned char value1, value2, setStatus;
@@ -609,6 +609,9 @@ void cpu(short int pc_addr, State *st) {
                 SET(ZERO, !st->a);
                 SET(NEGATIVE, st->a < 0);
                 break;
+
+            default:
+                log("Invalid! %02X at @%02X\n", opcode, st->pc);
         }
 
         if (setStatus) {
