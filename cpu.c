@@ -151,7 +151,7 @@ void cpu(uint16_t pc_addr, State *st) {
             case 0x00: log("BRK");
                 st->pc += 2;
                 SET_MEM_AT16(st->sp - 2, st->pc);
-                MEM_AT(st->sp - 3) = st->p;
+                MEM_AT(st->sp - 3) = st->p | 1 << RESERVED | 1 << BREAK;;
                 st->pc = MEM_AT16(0xFFFE);
                 SET(BREAK, 1);
                 break;
@@ -445,7 +445,7 @@ void cpu(uint16_t pc_addr, State *st) {
 
             //PHP
             case 0x08: log("PHP");
-                MEM_AT(st->sp - 1) = st->p;
+                MEM_AT(st->sp - 1) = st->p | 1 << RESERVED | 1 << BREAK;
                 st->sp--;
                 break;
 
@@ -638,7 +638,7 @@ void cpu(uint16_t pc_addr, State *st) {
 
         if (setZN) {
             SET(NEGATIVE, (result & 0x80) != 0);
-            SET(ZERO, result == 0);
+            SET(ZERO, (result & 0xFF) == 0);
         }
 
         log("\n");

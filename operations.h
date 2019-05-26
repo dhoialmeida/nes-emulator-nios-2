@@ -95,7 +95,7 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
     SET(CARRY, tmp_result > 0xFF); \
     result = ((tmp_a & 0x80) == (tmp_b & 0x80)) && ((tmp_result & 0x80) != (tmp_a & 0x80)); \
     SET(OVERFLOW, result); \
-    result = (uint8_t) tmp_result; \
+    result = tmp_result; \
     dest = result; \
     setZN = 1; \
 } while (0)
