@@ -64,3 +64,4 @@ dkms.conf
 # Ignore all local history of files
 .history
 .vscode/launch.json
+test.log

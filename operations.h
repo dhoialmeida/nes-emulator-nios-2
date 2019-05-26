@@ -112,10 +112,13 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
     SET(OVERFLOW, (value & 64) >> 6); \
     SET(NEGATIVE, (value & 128) >> 7)
 // Compara A com B e seta as flags
-#define COMPARE(a, b) \
-    SET(CARRY, (a) >= (b)); \
-    SET(ZERO, (a) == (b)); \
-    SET(NEGATIVE, (a) < (b))
+#define COMPARE(a, b) do { \
+    uint8_t tmp_a = (a); \
+    uint8_t tmp_b = (b); \
+    SET(CARRY, tmp_a >= tmp_b); \
+    SET(ZERO, tmp_a == tmp_b); \
+    SET(NEGATIVE, (tmp_a - tmp_b) >> 7); \
+} while (0)
 // Compara value ao acumulador
 #define CMP(value) COMPARE(st->a, value)
 // Compara value a x
