@@ -6,7 +6,8 @@ Variáveis externas utilizadas: (podem ser redefinidas com #define antes de incl
 st = ponteiro para struct de status
 result = resultado da operação (que pode ser checado no fim para setar as flags), 16 bits
 eaddr = endereço efetivo ("real") do último value carregado por uma das operações OP_X
-setStatus = setada para falso caso o loop principal não deva atualizar o registrador de status baseado em result
+setCV = 1 se o loop principal deve atualizar flags Carry e Overflow
+setZN = 1 se o loop principal deve atualizar flags Zero e Negative
 */
 
 // Obtém o value de memória salvo no endereço x
@@ -25,12 +26,12 @@ setStatus = setada para falso caso o loop principal não deva atualizar o regist
 // Armazena value do próximo parâmetro em var (imediato)
 #define OP_IMM(var) eaddr = st->pc; \
     var = MEM_AT(st->pc); \
-    log("#$%02X", var); \
+    log("#$%02hhX", var); \
     st->pc++
 
 // (endereçamento zero page, com indice)
 #define OP_ZP(var, idx) eaddr = MEM_AT(st->pc); \
-    log("$%02X, " #idx, eaddr); \
+    log("$%02hhX, " #idx, eaddr); \
     eaddr = (char) (eaddr + idx); \
     var = MEM_AT(eaddr); \
     st->pc++
@@ -85,42 +86,43 @@ setStatus = setada para falso caso o loop principal não deva atualizar o regist
 #define SUB(a, b, c) (a) - (b) - (c)
 
 // === Operações
-
+// Adiciona a a b e salva o resultado em dest
+#define ADC_(dest, a, b) setCV = 1; setZN = 1; result = (a) + (b) + GET(CARRY); dest = result
 // Adiciona value ao acumulador
-#define ADC(value) result = st->a + (value) + GET(CARRY); st->a = result
+#define ADC(value) ADC_(st->a, st->a, value)
 // Efetua AND de value com o acumulador, salvando o resultado no acumulador
-#define AND(value) st->a &= value; result = st->a
+#define AND(value) setZN = 1; st->a &= value; result = st->a
 // Shift left one bit (dest, source)
-#define ASL(dest, source) result = (source << 1); dest = result
+#define ASL(dest, source) setZN = 1; result = (source << 1); dest = result; SET(CARRY, source >> 7);
 // Efeuta a operação BIT
-#define BIT(value) setStatus = 0; result = st->a & value; \
+#define BIT(value) result = st->a & value; \
     SET(ZERO, result == 0); \
     SET(OVERFLOW, (value & 64) >> 6); \
     SET(NEGATIVE, (value & 128) >> 7)
 // Compara value ao acumulador
-#define CMP(value) result = SUB(st->a, (value), 0)
+#define CMP(value) ADC_(result, st->a, ~value)
 // Compara value a x
-#define CPX(value) result = SUB(st->x, (value), 0)
+#define CPX(value) ADC_(result, st->x, ~value)
 // Compara value a y
-#define CPY(value) result = SUB(st->y, (value), 0)
+#define CPY(value) ADC_(result, st->y, ~value)
 // Decrementa source, salva dest
-#define DEC(dest, source) result = (source) - 1; dest = result
+#define DEC(dest, source) setZN = 1; result = (source) - 1; dest = result
 // Xor do value com acumulador, salvo em acumulador
-#define EOR(value) result = st->a ^ (value); st->a = result
+#define EOR(value) setZN = 1; result = st->a ^ (value); st->a = result
 // Incrementa source, salva em dest
-#define INC(dest, source) result = (source) + 1; dest = result
+#define INC(dest, source) setZN = 1; result = (source) + 1; dest = result
 // Carrega value no dest
-#define LDA(dest, source) result = source; dest = source
+#define LDA(dest, source) setZN = 1; dest = source; result = dest
 // Shift left one bit (dest, source)
-#define LSR(dest, source) setStatus = 0; SET(CARRY, source & 0x1); result = (source >> 1); result += (source & 0x1); dest = result
+#define LSR(dest, source) setCV = 0; setZN = 1; SET(CARRY, source & 0x1); result = (source >> 1); result += (source & 0x1); dest = result
 // Or com acumulador
-#define ORA(value) result = st->a | (value); st->a = result
+#define ORA(value) setZN = 1; result = st->a | (value); st->a = result
 // Rotate left
-#define ROL(dest, value) setStatus = 0; result = (value >> 7) & 1; dest = ((value) << 1) | GET(CARRY); SET(CARRY, result); result = dest
+#define ROL(dest, value) setCV = 0; setZN = 1; result = (value >> 7) & 1; dest = ((value) << 1) | GET(CARRY); SET(CARRY, result); result = dest
 // Rotate right
-#define ROR(dest, value) setStatus = 0; result = (value & 1); dest = ((value) >> 1) | (GET(CARRY) << 7); SET(CARRY, result); result = dest
+#define ROR(dest, value) setCV = 0; setZN = 1; result = (value & 1); dest = ((value) >> 1) | (GET(CARRY) << 7); SET(CARRY, result); result = dest
 // Subtrai value ao acumulador
-#define SBC(value) result = SUB(st->a, value, !GET(CARRY)); st->a = result
+#define SBC(value) ADC_(st->a, st->a, ~value)
 // Salva acumulador na memória
 #define STA(addr) MEM_AT(eaddr) = st->a
 // Salva X na memória
@@ -128,4 +130,4 @@ setStatus = setada para falso caso o loop principal não deva atualizar o regist
 // Salva Y na memória
 #define STY(addr) MEM_AT(eaddr) = st->y
 // Transfere de registrador 1 para 2
-#define TRN(dest, source) source = dest
+#define TRN(dest, source) setZN = 1; dest = source; result = dest

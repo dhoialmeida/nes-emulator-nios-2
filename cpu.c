@@ -1,22 +1,26 @@
 #include <stdio.h>
+#include <stdint.h>
+
 #include "headers.h"
 #include "operations.h"
 
-short int _(short int addr) { //alterar mapping apenas para escrita
+uint16_t _(uint16_t addr) { //alterar mapping apenas para escrita
     return addr;
 }
 
-void cpu(unsigned short int pc_addr, State *st) {
+void cpu(uint16_t pc_addr, State *st) {
     st->pc = pc_addr;
-    short int result;
-    short unsigned int addr, eaddr;
-    unsigned char opcode;
-    unsigned char value1, value2, setStatus;
+    st->p = 0x24;
+    st->sp = 0x1FD;
+    uint16_t result;
+    uint16_t addr, eaddr;
+    uint8_t opcode, value1, value2, setCV, setZN;
 
     while (1) {
-        setStatus = 1;
+        setCV = 0;
+        setZN = 0;
+        log("%04X | A:%02hhX X:%02hhX Y:%02hhX P:%02hhX SP:%02hhX | ", st->pc, st->a, st->x, st->y, st->p, st->sp & 0xFF);
         OP_CODE(opcode); //OPCODES: http://6502.org/tutorials/6502opcodes.html#BRA
-        log("%02X: ", st->pc);
         switch (opcode) {  //MODE: Syntax
             //ADC
             case 0x69: log("ADC ");
@@ -25,22 +29,22 @@ void cpu(unsigned short int pc_addr, State *st) {
             case 0x65: log("ADC ");
                 OP_ZP(value1, 0); ADC(value1);
                 break;
-            case 0x75: log("ADC $FF, ");
+            case 0x75: log("ADC ");
                 OP_ZP(value1, st->x); ADC(value1);
                 break;
             case 0x6D: log("ADC ");
                 OP_ABS(value1, 0); ADC(value1);
                 break;
-            case 0x7D: log("ADC $FFFF, ");
+            case 0x7D: log("ADC ");
                 OP_ABS(value1, st->x); ADC(value1);
                 break;
-            case 0x79: log("ADC $FFFF, ");
+            case 0x79: log("ADC ");
                 OP_ABS(value1, st->y); ADC(value1);
                 break;
             case 0x61: log("ADC ");
                 OP_INDIR_PRE(value1, st->x); ADC(value1);
                 break;
-            case 0x71: log("ADC ($FF), ");
+            case 0x71: log("ADC ");
                 OP_INDIR_POS(value1, st->y); ADC(value1);
                 break;
 
@@ -90,41 +94,57 @@ void cpu(unsigned short int pc_addr, State *st) {
             //BCC
             case 0x90: log("BCC ");
                 eaddr = MEM_AT(st->pc);
-                log("%+2d", eaddr);
+                st->pc += 1;
+                log("%02hhX", eaddr);
                 if (GET(CARRY) == 0) LEA_REL(st->pc, eaddr);
                 break;
 
             //BCS
-            case 0xB0: log("BCS $FF");
-                if (GET(CARRY) != 0) LEA_REL(st->pc, MEM_AT(st->pc));
+            case 0xB0: log("BCS ");
+                eaddr = MEM_AT(st->pc);
+                st->pc += 1;
+                log("%02hhX", eaddr);
+                if (GET(CARRY) != 0) LEA_REL(st->pc, eaddr);
                 break;
 
             //BEQ
-            case 0xF0: log("BEQ $FF");
-                if (GET(ZERO) != 0) LEA_REL(st->pc, MEM_AT(st->pc));
+            case 0xF0: log("BEQ ");
+                eaddr = MEM_AT(st->pc);
+                st->pc += 1;
+                log("%02hhX", eaddr);
+                if (GET(ZERO) != 0) LEA_REL(st->pc, eaddr);
                 break;
 
             //BIT
-            case 0x24: log("BIT $FF");
+            case 0x24: log("BIT ");
                 OP_ZP(value1, 0); BIT(value1);
                 break;
-            case 0x2C:
+            case 0x2C: log("BIT ");
                 OP_ABS(value1, 0); BIT(value1);
                 break;
 
             //BMI
-            case 0x30: log("BMI $FF");
-                if (GET(NEGATIVE) != 0) LEA_REL(st->pc, MEM_AT(st->pc));
+            case 0x30: log("BMI ");
+                eaddr = MEM_AT(st->pc);
+                st->pc += 1;
+                log("%02hhX", eaddr);
+                if (GET(NEGATIVE) != 0) LEA_REL(st->pc, eaddr);
                 break;
 
             //BNE
-            case 0xD0: log("BNE $FF");
-                if (GET(ZERO) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
+            case 0xD0: log("BNE ");
+                eaddr = MEM_AT(st->pc);
+                st->pc += 1;
+                log("%02hhX", eaddr);
+                if (GET(ZERO) == 0) LEA_REL(st->pc, eaddr);
                 break;
 
             //BPL
-            case 0x10: log("BPL $FF");
-                if (GET(NEGATIVE) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
+            case 0x10: log("BPL ");
+                eaddr = MEM_AT(st->pc);
+                st->pc += 1;
+                log("%02hhX", eaddr);
+                if (GET(NEGATIVE) == 0) LEA_REL(st->pc, eaddr);
                 break;
 
             //BRK
@@ -137,13 +157,19 @@ void cpu(unsigned short int pc_addr, State *st) {
                 break;
 
             //BVC
-            case 0x50: log("BVC $FF");
-                if (GET(OVERFLOW) == 0) LEA_REL(st->pc, MEM_AT(st->pc));
+            case 0x50: log("BVC ");
+                eaddr = MEM_AT(st->pc);
+                st->pc += 1;
+                log("%02hhX", eaddr);
+                if (GET(OVERFLOW) == 0) LEA_REL(st->pc, eaddr);
                 break;
 
             //BVS
-            case 0x70: log("BVS $FF");
-                if (GET(OVERFLOW) != 0) LEA_REL(st->pc, MEM_AT(st->pc));
+            case 0x70: log("BVS ");
+                eaddr = MEM_AT(st->pc);
+                st->pc += 1;
+                log("%02hhX", eaddr);
+                if (GET(OVERFLOW) != 0) LEA_REL(st->pc, eaddr);
                 break;
 
             //CLC
@@ -290,16 +316,16 @@ void cpu(unsigned short int pc_addr, State *st) {
 
             //JMP
             case 0x4C: log("JMP ");
-                OP_ABS(value1, 0); st->pc = eaddr;
+                OP_ABS(value1, 0); st->pc = eaddr; setCV = 0;
                 break;
             case 0x6C: log("JMP ");
-                OP_INDIR(value1); st->pc = eaddr;
+                OP_INDIR(value1); st->pc = eaddr; setCV = 0;
                 break;
 
             //JSR
             case 0x20: log("JSR ");
                 OP_ABS(value1, 0);
-                SET_MEM_AT16(st->sp - 2, st->pc + 1);
+                SET_MEM_AT16(st->sp - 2, st->pc - 1);
                 st->sp -= 2;
                 st->pc = eaddr;
                 break;
@@ -365,7 +391,7 @@ void cpu(unsigned short int pc_addr, State *st) {
                 break;
 
             //LSR
-            case 0x4A: log("LSR ");
+            case 0x4A: log("LSR A");
                 LSR(st->a, st->a);
                 break;
             case 0x46: log("LSR ");
@@ -436,7 +462,7 @@ void cpu(unsigned short int pc_addr, State *st) {
                 break;
 
             //ROL
-            case 0x2A: log("ROL ");
+            case 0x2A: log("ROL A");
                 ROL(st->a, st->a);
                 break;
             case 0x26: log("ROL ");
@@ -453,7 +479,7 @@ void cpu(unsigned short int pc_addr, State *st) {
                 break;
 
             //ROR
-            case 0x6A: log("ROR ");
+            case 0x6A: log("ROR A");
                 ROR(st->a, st->a);
                 break;
             case 0x66: log("ROR ");
@@ -570,34 +596,22 @@ void cpu(unsigned short int pc_addr, State *st) {
 
             //TAX
             case 0xAA: log("TAX");
-                setStatus = 0;
                 TRN(st->x, st->a);
-                SET(ZERO, !st->x);
-                SET(NEGATIVE, st->x < 0);
                 break;
 
             //TAY
             case 0xA8: log("TAY");
-                setStatus = 0;
                 TRN(st->y, st->a);
-                SET(ZERO, !st->y);
-                SET(NEGATIVE, st->y < 0);
                 break;
 
             //TSX
             case 0xBA: log("TSX");
-                setStatus = 0;
                 TRN(st->x, st->sp);
-                SET(ZERO, !st->x);
-                SET(NEGATIVE, st->x < 0);
                 break;
 
             //TXA
             case 0x8A: log("TXA");
-                setStatus = 0;
                 TRN(st->a, st->x);
-                SET(ZERO, !st->a);
-                SET(NEGATIVE, st->a < 0);
                 break;
 
             //TXS
@@ -607,23 +621,23 @@ void cpu(unsigned short int pc_addr, State *st) {
 
             //TYA
             case 0x98: log("TYA");
-                setStatus = 0;
                 TRN(st->a, st->y);
-                SET(ZERO, !st->a);
-                SET(NEGATIVE, st->a < 0);
                 break;
 
             default:
                 log("! %02X", opcode);
         }
 
-        if (setStatus) {
+        if (setCV) {
             SET(CARRY, result > 255);
             SET(OVERFLOW, result > 127 || result < -128);
-            SET(NEGATIVE, result < 0);
+        }
+
+        if (setZN) {
+            SET(NEGATIVE, (result & 0x80) != 0);
             SET(ZERO, result == 0);
         }
 
-        log("\t\t\ta:%02X x:%02X y:%02X p:%02X sp:%04X\n", st->a, st->x, st->y, st->p, st->sp);
+        log("\n");
     }
 }

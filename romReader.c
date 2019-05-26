@@ -1,14 +1,15 @@
+#include <stdint.h>
 #include "headers.h"
 
-short int romRead(unsigned char* cart, State* st, PPU* ppu){
+uint16_t romRead(unsigned char* cart, State* st, PPU* ppu){
     int prgSize = cart[4]*16000;
     int VSize = cart[5]*8000;
     int idx=0;
 
     // TODO: MAPPER
 
-    unsigned short int prgStart;
-    unsigned short int prgWriter;
+    uint16_t prgStart;
+    uint16_t prgWriter;
 
     if(prgSize == 16000){
         prgStart = 0xC000;

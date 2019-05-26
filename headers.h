@@ -1,15 +1,17 @@
+#include <stdint.h>
+
 #define log(...) printf(__VA_ARGS__)
 
 typedef struct State {
-    unsigned short int pc, sp;
-    unsigned char p, a, x, y;
-    unsigned char memory[65536];
+    uint16_t pc, sp;
+    uint8_t p, a, x, y;
+    uint8_t memory[65536];
 } State;
 
 typedef struct PPU {
-    unsigned char memory[0x4000];
+    uint8_t memory[0x4000];
 } PPU;
 
-void cpu(unsigned short int pc_addr, State *st);
+void cpu(uint16_t pc_addr, State *st);
 
-short int romRead(unsigned char* cart, State* st, PPU* ppu);
+uint16_t romRead(uint8_t* cart, State* st, PPU* ppu);
