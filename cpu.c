@@ -4,7 +4,8 @@
 #include "headers.h"
 #include "operations.h"
 
-uint16_t _(uint16_t addr) { //alterar mapping apenas para escrita
+uint16_t map(uint16_t addr) { //alterar mapping apenas para escrita
+    if (addr > 0x8000 && addr < 0xC000) addr += 0x4000;
     return addr;
 }
 

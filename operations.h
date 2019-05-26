@@ -8,11 +8,12 @@ result = resultado da operação (que pode ser checado no fim para setar as flag
 eaddr = endereço efetivo ("real") do último value carregado por uma das operações OP_X
 setCV = 1 se o loop principal deve atualizar flags Carry e Overflow
 setZN = 1 se o loop principal deve atualizar flags Zero e Negative
+map = função que mapeia endereços de memória
 */
 
 // Obtém o value de memória salvo no endereço x
 // Também functiona como l-value
-#define MEM_AT(x) st->memory[(x)]
+#define MEM_AT(x) st->memory[map(x)]
 // Obtém o value de memória salvo no endereço X (16 bits)
 #define MEM_AT16(x) (MEM_AT((x)+1) << 8) + MEM_AT(x)
 // Altera o value na memória (16 bits)
@@ -32,7 +33,7 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
 // (endereçamento zero page, com indice)
 #define OP_ZP(var, idx) eaddr = MEM_AT(st->pc); \
     log("$%02hhX, " #idx, eaddr); \
-    eaddr = (char) (eaddr + idx); \
+    eaddr = (uint8_t) (eaddr + idx); \
     var = MEM_AT(eaddr); \
     st->pc++
 
@@ -51,12 +52,16 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
     st->pc += 2
 
 // (endereçamento indireto, prefixado)
-#define OP_INDIR_PRE(var, x) eaddr = MEM_AT(st->pc); \
+#define OP_INDIR_PRE(var, x) do { \
+    uint8_t tmp1; \
+    eaddr = MEM_AT(st->pc); \
     log("($%2X,X)", eaddr); \
-    eaddr = (char) (eaddr + x); \
-    eaddr = MEM_AT16(eaddr); \
+    eaddr = (uint8_t) (eaddr + (x)); \
+    tmp1 = (uint8_t) (eaddr + 1); \
+    eaddr = MEM_AT(eaddr) + (MEM_AT(tmp1) << 8); \
     var = MEM_AT(eaddr); \
-    st->pc += 1
+    st->pc += 1; \
+} while (0)
 
 // (endereçamento indireto, posfixado)
 #define OP_INDIR_POS(var, y) eaddr = MEM_AT(st->pc); \
@@ -105,7 +110,7 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
 // Efetua AND de value com o acumulador, salvando o resultado no acumulador
 #define AND(value) setZN = 1; st->a &= value; result = st->a
 // Shift left one bit (dest, source)
-#define ASL(dest, source) setZN = 1; result = (source << 1); dest = result; SET(CARRY, source >> 7);
+#define ASL(dest, source) setZN = 1; SET(CARRY, source >> 7); result = (source << 1); dest = result;
 // Efeuta a operação BIT
 #define BIT(value) result = st->a & value; \
     SET(ZERO, result == 0); \
@@ -133,8 +138,8 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
 #define INC(dest, source) setZN = 1; result = (source) + 1; dest = result
 // Carrega value no dest
 #define LDA(dest, source) setZN = 1; dest = source; result = dest
-// Shift left one bit (dest, source)
-#define LSR(dest, source) setCV = 0; setZN = 1; SET(CARRY, source & 0x1); result = (source >> 1); result += (source & 0x1); dest = result
+// Shift right one bit (dest, source)
+#define LSR(dest, source) setCV = 0; setZN = 1; SET(CARRY, source & 0x1); result = (source >> 1); dest = result
 // Or com acumulador
 #define ORA(value) setZN = 1; result = st->a | (value); st->a = result
 // Rotate left
