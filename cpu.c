@@ -11,7 +11,7 @@ uint16_t _(uint16_t addr) { //alterar mapping apenas para escrita
 void cpu(uint16_t pc_addr, State *st) {
     st->pc = pc_addr;
     st->p = 0x24;
-    st->sp = 0x1FD;
+    st->sp = 0xFD;
     uint16_t result;
     uint16_t addr, eaddr;
     uint8_t opcode, value1, value2, setCV, setZN;
@@ -150,8 +150,9 @@ void cpu(uint16_t pc_addr, State *st) {
             //BRK
             case 0x00: log("BRK");
                 st->pc += 2;
-                SET_MEM_AT16(st->sp - 2, st->pc);
-                MEM_AT(st->sp - 3) = st->p | 1 << RESERVED | 1 << BREAK;;
+                SET_MEM_AT16(STACK_PAGE + st->sp - 1, st->pc);
+                MEM_AT(STACK_PAGE + st->sp - 2) = st->p | 1 << RESERVED | 1 << BREAK;
+                st->sp -= 3;
                 st->pc = MEM_AT16(0xFFFE);
                 SET(BREAK, 1);
                 break;
@@ -325,7 +326,7 @@ void cpu(uint16_t pc_addr, State *st) {
             //JSR
             case 0x20: log("JSR ");
                 OP_ABS(value1, 0);
-                SET_MEM_AT16(st->sp - 2, st->pc - 1);
+                SET_MEM_AT16(STACK_PAGE + st->sp - 1, st->pc - 1);
                 st->sp -= 2;
                 st->pc = eaddr;
                 break;
@@ -439,26 +440,26 @@ void cpu(uint16_t pc_addr, State *st) {
 
             //PHA
             case 0x48: log("PHA");
-                MEM_AT(st->sp - 1) = st->a;
+                MEM_AT(STACK_PAGE + st->sp) = st->a;
                 st->sp--;
                 break;
 
             //PHP
             case 0x08: log("PHP");
-                MEM_AT(st->sp - 1) = st->p | 1 << RESERVED | 1 << BREAK;
+                MEM_AT(STACK_PAGE + st->sp) = st->p | 1 << RESERVED | 1 << BREAK;
                 st->sp--;
                 break;
 
             //PLA
             case 0x68: log("PLA");
                 setZN = 1;
-                result = st->a = MEM_AT(st->sp);
+                result = st->a = MEM_AT(STACK_PAGE + st->sp + 1);
                 st->sp++;
                 break;
 
             //PLP
             case 0x28: log("PLP");
-                st->p = MEM_AT(st->sp);
+                st->p = MEM_AT(STACK_PAGE + st->sp + 1);
                 SET(BREAK, 0);
                 SET(RESERVED, 1);
                 st->sp++;
@@ -500,14 +501,14 @@ void cpu(uint16_t pc_addr, State *st) {
 
             //RTI
             case 0x40: log("RTI");
-                st->p = MEM_AT(st->sp);
-                st->pc = MEM_AT16(st->sp + 1);
+                st->p = MEM_AT(STACK_PAGE + st->sp + 1);
+                st->pc = MEM_AT16(STACK_PAGE + st->sp + 2);
                 st->sp += 3;
                 break;
 
             //RTS
             case 0x60: log("RTS");
-                st->pc = MEM_AT16(st->sp) + 1;
+                st->pc = MEM_AT16(STACK_PAGE + st->sp + 1) + 1;
                 st->sp += 2;
                 break;
 
@@ -620,6 +621,7 @@ void cpu(uint16_t pc_addr, State *st) {
             //TXS
             case 0x9A: log("TXS");
                 TRN(st->sp, st->x);
+                setZN = 0;
                 break;
 
             //TYA

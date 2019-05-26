@@ -1,10 +1,11 @@
 #include <stdint.h>
 
 #define log(...) printf(__VA_ARGS__)
+#define STACK_PAGE 0x100
 
 typedef struct State {
-    uint16_t pc, sp;
-    uint8_t p, a, x, y;
+    uint16_t pc;
+    uint8_t p, a, x, y, sp;
     uint8_t memory[65536];
 } State;
 
