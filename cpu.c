@@ -230,13 +230,13 @@ void cpu(uint16_t pc_addr, State *st) {
                 break;
 
             //CPY
-            case 0xC0: log("CPX ");
+            case 0xC0: log("CPY ");
                 OP_IMM(value1); CPY(value1);
                 break;
-            case 0xC4: log("CPX ");
+            case 0xC4: log("CPY ");
                 OP_ZP(value1, 0); CPY(value1);
                 break;
-            case 0xCC: log("CPX ");
+            case 0xCC: log("CPY ");
                 OP_ABS(value1, 0); CPY(value1);
                 break;
 
