@@ -319,10 +319,10 @@ void cpu(uint16_t pc_addr, State *st) {
 
             //JMP
             case 0x4C: log("JMP ");
-                OP_ABS(value1, 0); st->pc = eaddr; setCV = 0;
+                OP_ABS(value1, 0); st->pc = eaddr;
                 break;
             case 0x6C: log("JMP ");
-                OP_INDIR(value1); st->pc = eaddr; setCV = 0;
+                OP_INDIR(addr); st->pc = addr;
                 break;
 
             //JSR

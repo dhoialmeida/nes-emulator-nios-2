@@ -46,11 +46,13 @@ cyc = contador de ciclos
     st->pc += 2
 
 // (enderçamento indireto, addr = 16 bits)
-#define OP_INDIR(addr) eaddr = MEM_AT16(st->pc); \
-    log("($%04X)", eaddr); \
-    eaddr = MEM_AT16(eaddr); \
-    addr = MEM_AT16(eaddr); \
-    st->pc += 2
+#define OP_INDIR(addr) do { \
+    uint16_t high, low; \
+    eaddr = MEM_AT16(st->pc); \
+    high = eaddr & 0xFF00; \
+    low = (eaddr + 1) & 0xFF; \
+    addr = MEM_AT(eaddr) + (MEM_AT(high + low) << 8); \
+} while (0)
 
 // (endereçamento indireto, prefixado)
 #define OP_INDIR_PRE(var, x) do { \
