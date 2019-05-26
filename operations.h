@@ -87,7 +87,15 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
 
 // === Operações
 // Adiciona a a b e salva o resultado em dest
-#define ADC_(dest, a, b) setCV = 1; setZN = 1; result = (a) + (b) + GET(CARRY); dest = result
+#define ADC_(dest, a, b) \
+    setZN = 1; \
+    result = (a) + (b) + GET(CARRY); \
+    dest = result; \
+    SET(CARRY, result > 0xFF); \
+    result = (~((a) ^(b)) & ((a) ^ result) & 0x80) >> 7; \
+    SET(OVERFLOW, result); \
+    result = dest
+
 // Adiciona value ao acumulador
 #define ADC(value) ADC_(st->a, st->a, value)
 // Efetua AND de value com o acumulador, salvando o resultado no acumulador
@@ -99,12 +107,17 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
     SET(ZERO, result == 0); \
     SET(OVERFLOW, (value & 64) >> 6); \
     SET(NEGATIVE, (value & 128) >> 7)
+// Compara A com B e seta as flags
+#define COMPARE(a, b) \
+    SET(CARRY, (a) >= (b)); \
+    SET(ZERO, (a) == (b)); \
+    SET(NEGATIVE, (a) < (b))
 // Compara value ao acumulador
-#define CMP(value) ADC_(result, st->a, ~value)
+#define CMP(value) COMPARE(st->a, value)
 // Compara value a x
-#define CPX(value) ADC_(result, st->x, ~value)
+#define CPX(value) COMPARE(st->x, value)
 // Compara value a y
-#define CPY(value) ADC_(result, st->y, ~value)
+#define CPY(value) COMPARE(st->y, value)
 // Decrementa source, salva dest
 #define DEC(dest, source) setZN = 1; result = (source) - 1; dest = result
 // Xor do value com acumulador, salvo em acumulador

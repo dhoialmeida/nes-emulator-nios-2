@@ -451,7 +451,8 @@ void cpu(uint16_t pc_addr, State *st) {
 
             //PLA
             case 0x68: log("PLA");
-                st->a = MEM_AT(st->sp);
+                setZN = 1;
+                result = st->a = MEM_AT(st->sp);
                 st->sp++;
                 break;
 
