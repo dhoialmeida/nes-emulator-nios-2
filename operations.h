@@ -9,6 +9,7 @@ eaddr = endereço efetivo ("real") do último value carregado por uma das opera�
 setCV = 1 se o loop principal deve atualizar flags Carry e Overflow
 setZN = 1 se o loop principal deve atualizar flags Zero e Negative
 map = função que mapeia endereços de memória
+cyc = contador de ciclos
 */
 
 // Obtém o value de memória salvo no endereço x
@@ -64,12 +65,17 @@ map = função que mapeia endereços de memória
 } while (0)
 
 // (endereçamento indireto, posfixado)
-#define OP_INDIR_POS(var, y) eaddr = MEM_AT(st->pc); \
+#define OP_INDIR_POS(var, y) do { \
+    uint8_t tmp1; \
+    eaddr = MEM_AT(st->pc); \
     log("($%2X), Y", eaddr); \
-    eaddr = MEM_AT16(eaddr); \
+    eaddr = (uint8_t) (eaddr); \
+    tmp1 = (uint8_t) (eaddr + 1); \
+    eaddr = MEM_AT(eaddr) + (MEM_AT(tmp1) << 8); \
     eaddr += y; \
     var = MEM_AT(eaddr); \
-    st->pc++
+    st->pc += 1; \
+} while (0)
 
 // Salva o endereço efetivo em addr, a partir do endereço relativo rel_addr
 #define LEA_REL(addr, rel_addr) addr = (st->pc + (signed char) (rel_addr))

@@ -16,11 +16,12 @@ void cpu(uint16_t pc_addr, State *st) {
     uint16_t result;
     uint16_t addr, eaddr;
     uint8_t opcode, value1, value2, setCV, setZN;
+    uint32_t cyc = 7;
 
     while (1) {
         setCV = 0;
         setZN = 0;
-        log("%04X | A:%02hhX X:%02hhX Y:%02hhX P:%02hhX SP:%02hhX | ", st->pc, st->a, st->x, st->y, st->p, st->sp & 0xFF);
+        log("%04X | A:%02hhX X:%02hhX Y:%02hhX P:%02hhX SP:%02hhX CYC:%-6d | ", st->pc, st->a, st->x, st->y, st->p, st->sp & 0xFF, cyc);
         OP_CODE(opcode); //OPCODES: http://6502.org/tutorials/6502opcodes.html#BRA
         switch (opcode) {  //MODE: Syntax
             //ADC
@@ -96,7 +97,7 @@ void cpu(uint16_t pc_addr, State *st) {
             case 0x90: log("BCC ");
                 eaddr = MEM_AT(st->pc);
                 st->pc += 1;
-                log("%02hhX", eaddr);
+                log("%+03d", eaddr);
                 if (GET(CARRY) == 0) LEA_REL(st->pc, eaddr);
                 break;
 
@@ -104,7 +105,7 @@ void cpu(uint16_t pc_addr, State *st) {
             case 0xB0: log("BCS ");
                 eaddr = MEM_AT(st->pc);
                 st->pc += 1;
-                log("%02hhX", eaddr);
+                log("%+03d", eaddr);
                 if (GET(CARRY) != 0) LEA_REL(st->pc, eaddr);
                 break;
 
@@ -112,7 +113,7 @@ void cpu(uint16_t pc_addr, State *st) {
             case 0xF0: log("BEQ ");
                 eaddr = MEM_AT(st->pc);
                 st->pc += 1;
-                log("%02hhX", eaddr);
+                log("%+03d", eaddr);
                 if (GET(ZERO) != 0) LEA_REL(st->pc, eaddr);
                 break;
 
@@ -128,7 +129,7 @@ void cpu(uint16_t pc_addr, State *st) {
             case 0x30: log("BMI ");
                 eaddr = MEM_AT(st->pc);
                 st->pc += 1;
-                log("%02hhX", eaddr);
+                log("%+03d", eaddr);
                 if (GET(NEGATIVE) != 0) LEA_REL(st->pc, eaddr);
                 break;
 
@@ -136,7 +137,7 @@ void cpu(uint16_t pc_addr, State *st) {
             case 0xD0: log("BNE ");
                 eaddr = MEM_AT(st->pc);
                 st->pc += 1;
-                log("%02hhX", eaddr);
+                log("%+03d", eaddr);
                 if (GET(ZERO) == 0) LEA_REL(st->pc, eaddr);
                 break;
 
@@ -144,7 +145,7 @@ void cpu(uint16_t pc_addr, State *st) {
             case 0x10: log("BPL ");
                 eaddr = MEM_AT(st->pc);
                 st->pc += 1;
-                log("%02hhX", eaddr);
+                log("%+03d", eaddr);
                 if (GET(NEGATIVE) == 0) LEA_REL(st->pc, eaddr);
                 break;
 
@@ -162,7 +163,7 @@ void cpu(uint16_t pc_addr, State *st) {
             case 0x50: log("BVC ");
                 eaddr = MEM_AT(st->pc);
                 st->pc += 1;
-                log("%02hhX", eaddr);
+                log("%+03d", eaddr);
                 if (GET(OVERFLOW) == 0) LEA_REL(st->pc, eaddr);
                 break;
 
@@ -170,7 +171,7 @@ void cpu(uint16_t pc_addr, State *st) {
             case 0x70: log("BVS ");
                 eaddr = MEM_AT(st->pc);
                 st->pc += 1;
-                log("%02hhX", eaddr);
+                log("%+03d", eaddr);
                 if (GET(OVERFLOW) != 0) LEA_REL(st->pc, eaddr);
                 break;
 
