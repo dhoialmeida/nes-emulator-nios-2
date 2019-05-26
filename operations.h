@@ -39,11 +39,13 @@ cyc = contador de ciclos
     st->pc++
 
 // (endereçamento absoluto, com indice)
-#define OP_ABS(var, idx) eaddr = MEM_AT16(st->pc); \
+#define OP_ABS(var, idx, crossAdd) eaddr = MEM_AT16(st->pc); \
     log("$%04X, " #idx, eaddr); \
+    result = eaddr; \
     eaddr = (eaddr + idx); \
     var = MEM_AT(eaddr); \
-    st->pc += 2
+    st->pc += 2; \
+    cyc += ((result & 0xFF00) != (eaddr & 0xFF00)) & crossAdd
 
 // (enderçamento indireto, addr = 16 bits)
 #define OP_INDIR(addr) do { \
@@ -67,20 +69,38 @@ cyc = contador de ciclos
 } while (0)
 
 // (endereçamento indireto, posfixado)
-#define OP_INDIR_POS(var, y) do { \
+#define OP_INDIR_POS(var, y, crossAdd) do { \
     uint8_t tmp1; \
     eaddr = MEM_AT(st->pc); \
     log("($%2X), Y", eaddr); \
     eaddr = (uint8_t) (eaddr); \
     tmp1 = (uint8_t) (eaddr + 1); \
-    eaddr = MEM_AT(eaddr) + (MEM_AT(tmp1) << 8); \
+    result = eaddr = MEM_AT(eaddr) + (MEM_AT(tmp1) << 8); \
     eaddr += y; \
     var = MEM_AT(eaddr); \
     st->pc += 1; \
+    cyc += ((result & 0xFF00) != (eaddr & 0xFF00)) & crossAdd; \
 } while (0)
 
 // Salva o endereço efetivo em addr, a partir do endereço relativo rel_addr
 #define LEA_REL(addr, rel_addr) addr = (st->pc + (signed char) (rel_addr))
+
+// Efetua um branch relativo caso a condição seja verdadeira
+// Caso a branch seja tomada, gasta 1 ciclo a mais
+// Caso o destino esteja numa página diferente da página da próxima instrução,
+// gasta 1 ciclo a mais.
+#define BRANCH(condition) do { \
+    eaddr = MEM_AT(st->pc); \
+    st->pc += 1; \
+    result = st->pc; \
+    cyc += 2; \
+    log("%+03d", eaddr); \
+    if (condition) { \
+        cyc++; \
+        LEA_REL(st->pc, eaddr); \
+        cyc += ((result & 0xFF00) != (st->pc & 0xFF00)); \
+    } \
+} while (0)
 
 // === Bits de status
 #define CARRY 0
