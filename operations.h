@@ -75,6 +75,7 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
 #define INTERRUPT_DISABLE 2
 #define DECIMAL 3
 #define BREAK 4
+#define RESERVED 5
 #define OVERFLOW 6
 #define NEGATIVE 7
 
@@ -87,14 +88,17 @@ setZN = 1 se o loop principal deve atualizar flags Zero e Negative
 
 // === Operações
 // Adiciona a a b e salva o resultado em dest
-#define ADC_(dest, a, b) \
-    setZN = 1; \
-    result = (a) + (b) + GET(CARRY); \
-    dest = result; \
-    SET(CARRY, result > 0xFF); \
-    result = (~((a) ^(b)) & ((a) ^ result) & 0x80) >> 7; \
+#define ADC_(dest, a, b) do {\
+    uint8_t tmp_a = (a); \
+    uint8_t tmp_b = (b); \
+    uint16_t tmp_result = tmp_a + tmp_b + GET(CARRY); \
+    SET(CARRY, tmp_result > 0xFF); \
+    result = ((tmp_a & 0x80) == (tmp_b & 0x80)) && ((tmp_result & 0x80) != (tmp_a & 0x80)); \
     SET(OVERFLOW, result); \
-    result = dest
+    result = (uint8_t) tmp_result; \
+    dest = result; \
+    setZN = 1; \
+} while (0)
 
 // Adiciona value ao acumulador
 #define ADC(value) ADC_(st->a, st->a, value)

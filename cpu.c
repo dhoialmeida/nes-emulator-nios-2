@@ -459,6 +459,8 @@ void cpu(uint16_t pc_addr, State *st) {
             //PLP
             case 0x28: log("PLP");
                 st->p = MEM_AT(st->sp);
+                SET(BREAK, 0);
+                SET(RESERVED, 1);
                 st->sp++;
                 break;
 
