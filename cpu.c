@@ -502,6 +502,8 @@ void cpu(uint16_t pc_addr, State *st) {
             //RTI
             case 0x40: log("RTI");
                 st->p = MEM_AT(STACK_PAGE + st->sp + 1);
+                SET(BREAK, 0);
+                SET(RESERVED, 1);
                 st->pc = MEM_AT16(STACK_PAGE + st->sp + 2);
                 st->sp += 3;
                 break;
