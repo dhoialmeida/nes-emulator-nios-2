@@ -9,17 +9,19 @@ uint16_t map(uint16_t addr) { //alterar mapping apenas para escrita
 }
 
 void cpu(uint16_t pc_addr, State *st) {
+    uint16_t result;
+    uint16_t addr, eaddr;
+    uint8_t opcode, value1, value2, setCV, setZN;
+    uint32_t cyc = 7;
+    
     st->pc = pc_addr;
     st->a = 0;
     st->x = 0;
     st->y = 0;
     st->p = 0x24;
     st->sp = 0xFD;
-    uint16_t result;
-    uint16_t addr, eaddr;
-    uint8_t opcode, value1, value2, setCV, setZN;
-    uint32_t cyc = 7;
-
+    ppu_init(st);
+    
     while (1) {
         setCV = 0;
         setZN = 0;
