@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include "headers.h"
 
 uint16_t romRead(unsigned char* cart, State* st, PPU* ppu){

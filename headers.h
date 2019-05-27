@@ -1,4 +1,10 @@
-#include <stdint.h>
+#ifdef PLACA
+    typedef unsigned char uint8_t;
+    typedef unsigned short int uint16_t;
+    typedef unsigned int uint32_t;
+#else
+    #include <stdint.h>
+#endif
 
 #define log(...) printf(__VA_ARGS__)
 #define STACK_PAGE 0x100

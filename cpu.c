@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdint.h>
 
 #include "headers.h"
 #include "operations.h"
@@ -11,6 +10,9 @@ uint16_t map(uint16_t addr) { //alterar mapping apenas para escrita
 
 void cpu(uint16_t pc_addr, State *st) {
     st->pc = pc_addr;
+    st->a = 0;
+    st->x = 0;
+    st->y = 0;
     st->p = 0x24;
     st->sp = 0xFD;
     uint16_t result;
@@ -21,7 +23,7 @@ void cpu(uint16_t pc_addr, State *st) {
     while (1) {
         setCV = 0;
         setZN = 0;
-        log("%04X | A:%02hhX X:%02hhX Y:%02hhX P:%02hhX SP:%02hhX CYC:%-6d | ", st->pc, st->a, st->x, st->y, st->p, st->sp & 0xFF, cyc);
+        log("%04X | A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%-6d | ", st->pc, st->a, st->x, st->y, st->p, st->sp & 0xFF, cyc);
         OP_CODE(opcode); //OPCODES: http://6502.org/tutorials/6502opcodes.html#BRA
         switch (opcode) {  //MODE: Syntax
             //ADC

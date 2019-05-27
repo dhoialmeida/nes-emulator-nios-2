@@ -28,12 +28,12 @@ cyc = contador de ciclos
 // Armazena value do próximo parâmetro em var (imediato)
 #define OP_IMM(var) eaddr = st->pc; \
     var = MEM_AT(st->pc); \
-    log("#$%02hhX", var); \
+    log("#$%02X", var); \
     st->pc++
 
 // (endereçamento zero page, com indice)
 #define OP_ZP(var, idx) eaddr = MEM_AT(st->pc); \
-    log("$%02hhX, " #idx, eaddr); \
+    log("$%02X, " #idx, eaddr); \
     eaddr = (uint8_t) (eaddr + idx); \
     var = MEM_AT(eaddr); \
     st->pc++

@@ -3,6 +3,8 @@
 #include "headers.h"
 #define MAX_SIZE 100000
 
+uint8_t rom_data[MAX_SIZE];
+
 size_t read_file(char *name, uint8_t *buffer, size_t size) {
     FILE *f = fopen(name, "r");
     if (f != NULL) {
@@ -14,7 +16,7 @@ size_t read_file(char *name, uint8_t *buffer, size_t size) {
     return 0;
 }
 
-int main(int argc, char *argv[]) {
+int desktop_main(int argc, char *argv[]) {
     State st;
     PPU ppu;
     uint8_t jogo[MAX_SIZE];
@@ -25,4 +27,22 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     cpu(romRead(jogo, &st, &ppu), &st);
+
+    return 1;
+}
+
+void board_main() {
+    State st;
+    PPU ppu;
+    uint8_t *jogo = rom_data;
+    printf("%x\n", rom_data);
+    cpu(romRead(jogo, &st, &ppu), &st);
+}
+
+int main(int argc, char *argv[]) {
+    #ifdef PLACA
+        board_main();
+    #else
+        desktop_main(argc, argv);
+    #endif
 }

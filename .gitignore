@@ -8,6 +8,7 @@
 *.ko
 *.obj
 *.elf
+*.srec
 
 # Linker output
 *.ilk
