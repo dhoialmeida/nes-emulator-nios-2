@@ -1,9 +1,9 @@
+/* main.c - programa principal */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "headers.h"
 #define MAX_SIZE 100000
-
-uint8_t rom_data[MAX_SIZE];
 
 size_t read_file(char *name, uint8_t *buffer, size_t size) {
     FILE *f = fopen(name, "r");
@@ -17,26 +17,23 @@ size_t read_file(char *name, uint8_t *buffer, size_t size) {
 }
 
 int desktop_main(int argc, char *argv[]) {
-    State st;
-    PPU ppu;
     uint8_t jogo[MAX_SIZE];
+
     if (argc > 1) {
         read_file(argv[1], jogo, MAX_SIZE);
     } else {
         printf("./emulador nome_da_rom.\n");
         return 1;
     }
-    cpu(romRead(jogo, &st, &ppu), &st);
 
+    execute(jogo, 0xC000);
     return 1;
 }
 
 void board_main() {
-    State st;
-    PPU ppu;
-    uint8_t *jogo = rom_data;
-    printf("%x\n", rom_data);
-    cpu(romRead(jogo, &st, &ppu), &st);
+    uint8_t jogo[MAX_SIZE];
+    printf("%x\n", jogo);
+    execute(jogo, 0xC000);
 }
 
 int main(int argc, char *argv[]) {

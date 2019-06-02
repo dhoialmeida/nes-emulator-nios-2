@@ -1,3 +1,8 @@
+/* headers.h - Declarações principais */
+
+#ifndef MAIN_HEADERS
+#define MAIN_HEADERS
+
 #ifdef PLACA
     typedef unsigned char uint8_t;
     typedef unsigned short int uint16_t;
@@ -10,18 +15,20 @@
 #define STACK_PAGE 0x100
 
 //PPU REGISTERS:
-#define PPUCTRL 0x2000
-#define PPUMASK 0x2001
-#define PPUSTATUS 0x2002
-#define OAMADDR 0x2003
-#define PPUSCROLL 0x2005
-#define PPUADDR 0x2006
-#define PPUDATA 0x2007
+#define PPUCTRL 0x0
+#define PPUMASK 0x1
+#define PPUSTATUS 0x2
+#define OAMADDR 0x3
+#define PPUSCROLL 0x5
+#define PPUADDR 0x6
+#define PPUDATA 0x7
 
 typedef struct State {
     uint16_t pc;
     uint8_t p, a, x, y, sp;
-    uint8_t memory[65536];
+    uint8_t ppu_regs[8];
+    uint8_t io_regs[26];
+    uint8_t memory[0x800];
 } State;
 
 typedef struct PPU {
@@ -29,10 +36,9 @@ typedef struct PPU {
     uint8_t memory[0x4000];
 } PPU;
 
-void cpu(uint16_t pc_addr, State *st);
+#include "mappers/mappers.h"
 
-uint16_t romRead(uint8_t* cart, State* st, PPU* ppu);
+void execute(uint8_t *cartridge, uint32_t start_address);
+uint32_t cpu(State *st, Mapper *mapper, uint32_t cycles);
 
-void ppu_init(State *st);
-
-void ppu_cycle(uint8_t cpu_cycles);
+#endif
