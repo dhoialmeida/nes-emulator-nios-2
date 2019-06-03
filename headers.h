@@ -60,6 +60,8 @@ typedef struct State {
         uint16_t oam[256];
         uint16_t palette[0x20];
         uint16_t addr; // internal, not queued
+        uint8_t status_read;
+        uint8_t last_reg_written;
     } ppu;
 } State;
 

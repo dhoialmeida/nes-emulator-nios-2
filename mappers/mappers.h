@@ -36,8 +36,28 @@ inline __attribute__((always_inline)) uint8_t cpu_get(Mapper *mapper, uint16_t a
 
     // PPU
     if (addr < 0x4000) {
-        // (ultimo da fila)
-        return mapper->st->queue[mapper->st->ppu_regs[addr & 0x7]].data;
+        uint8_t read = mapper->st->ppu.status_read;
+        uint32_t cyc = mapper->st->cycles;
+        uint8_t v = 0;
+        switch (addr & 0x7) {
+            case PPUSTATUS:
+                mapper->st->ppu.addr = 0;
+                if (!read && cyc > 27394 && cyc < 29894) {
+                    mapper->st->ppu.status_read = 1;
+                    v = 0x80;
+                } else {
+                    v = 0;
+                }
+                return v | (mapper->st->ppu.last_reg_written & 0x1F);
+                break;
+            case PPUADDR:
+                return mapper->st->ppu.addr;
+            case PPUDATA:
+                return ppu_get(mapper, mapper->st->ppu.addr);
+                break;
+            default:
+                return mapper->st->queue[mapper->st->ppu_regs[addr & 0x7]].data;
+        }
     }
 
     // APU / IO
@@ -59,16 +79,21 @@ inline __attribute__((always_inline)) void cpu_set(Mapper *mapper, uint16_t addr
 
     // PPU
     if (addr < 0x4000) {
+        mapper->st->ppu.last_reg_written = value;
         switch (addr & 0x7) {
+            case PPUSTATUS:
+                break;
             case PPUADDR:
                 mapper->st->ppu.addr <<= 8;
                 mapper->st->ppu.addr |= value;
                 break;
             case PPUDATA:
                 ppu_set(mapper, mapper->st->ppu.addr, value);
+                mapper->st->ppu.addr++;
                 break;
+            default:
+                mapper->st->ppu_regs[addr & 7] = enqueue(mapper, mapper->st->ppu_regs[addr & 7], value);
         }
-        mapper->st->ppu_regs[addr & 7] = enqueue(mapper, mapper->st->ppu_regs[addr & 7], value);
         return;
     }
 

@@ -40,6 +40,7 @@ void set_powerup_state(State *st) {
     st->queue_top = FINAL_OFFSET;
 
     st->ppu.addr = 0x2000;
+    st->ppu.status_read = 0;
 }
 
 // "Reseta" a fila, descartando elementos antigos
@@ -103,8 +104,10 @@ void execute(uint8_t *cartridge, uint32_t start_address) {
         cur += cycles;
 
         if (cur > CYCLES_PER_FRAME) {
-            ppu(&st, &mapper);
+            ppu(&st, (Mapper *) &mapper);
+            st.ppu.status_read = 0;
             cur = 0;
+            st.cycles = 0;
         }
     }
 

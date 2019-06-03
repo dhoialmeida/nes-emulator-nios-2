@@ -1,4 +1,5 @@
-#include "headers.h"
+#ifdef PLACA
+#include "../headers.h"
 #define VIDEO_ADDR 0x08000000
 #define FRONT_BUFFER_ADDR 0x10003020;
 #define BACK_BUFFER_ADDR 0x10003024;
@@ -43,7 +44,7 @@ const int STATUS = 3;
 
 void graphics_update() {
     frame_count++;
-    
+
     if(frame_count > 10){
         //lcd_print("");
         frame_count = 0;
@@ -53,3 +54,4 @@ void graphics_update() {
 void graphics_finish() {
     clear_screen(0x0000);
 }
+#endif
