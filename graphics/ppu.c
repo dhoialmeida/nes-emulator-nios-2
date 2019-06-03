@@ -1,5 +1,7 @@
 /* ppu.c - Implementação da unidade de processamento de imagens */
+
 #include "../headers.h"
+#include "../mappers/mappers.h"
 
 // Palete de cores (R0, G0, B0, R1, G1, B1...)
 static uint8_t palette[] = {
@@ -22,9 +24,16 @@ static uint8_t palette[] = {
 #define BLUE(color) palette[(color)*3 + 2]
 
 // Renderiza um frame
-void ppu(State *st) {
-    for (int i = 0; i < 256*240; i++) {
-        draw_point(i & 0xFF, i >> 8, 0x85, 0x76, 0xFF);
+void ppu(State *st, Mapper *mapper) {
+    // for (int i = 0; i < 256*240; i++) {
+    //     draw_point(i & 0xFF, i >> 8, 0x85, 0x76, 0xFF);
+    // }
+
+    for (uint16_t tile = 0; tile < 960; tile++) {
+        uint8_t i = tile & 0x0F;
+        uint8_t j = tile >> 8;
+        uint8_t entry = ppu_get(mapper, 0x2000 + tile);
+        uint8_t attr = ppu_get(mapper, 0x23C0 + (i << 2) + (j >> 1));
     }
 
     graphics_update();

@@ -39,10 +39,10 @@ uint8_t nrom_ppu_get(Mapper *mapper, uint16_t addr) {
         } else {
             addr &= (addr & 0xBFF) | ((addr & 0x800) >> 1);
         }
-        return map->st->ppu.vram[addr];
+        return map->st->queue[map->st->ppu.vram[addr]].data;
     }
 
-    return map->st->ppu.pallete[addr & 0x1F];
+    return map->st->queue[map->st->ppu.palette[addr & 0x1F]].data;
 }
 
 void nrom_ppu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
@@ -60,11 +60,12 @@ void nrom_ppu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
         } else {
             addr &= (addr & 0xBFF) | ((addr & 0x800) >> 1);
         }
-        map->st->ppu.vram[addr] = value;
+
+        map->st->ppu.vram[addr] = enqueue(mapper, map->st->ppu.vram[addr], value);
         return;
     }
 
-    map->st->ppu.pallete[addr & 0x1F] = value;
+    map->st->ppu.palette[addr & 0x1F] = enqueue(mapper, map->st->ppu.palette[addr & 0x1F], value);
 }
 
 void nrom_init(MapperNROM *mapper, State *st, uint8_t *cartridge) {

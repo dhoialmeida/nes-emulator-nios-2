@@ -8,6 +8,7 @@
 
 // Altera o estado para o estado de power-up
 void set_powerup_state(State *st) {
+    uint16_t i;
     st->a = 0;
     st->x = 0;
     st->y = 0;
@@ -15,16 +16,30 @@ void set_powerup_state(State *st) {
     st->sp = 0xFD;
     st->cycles = 7;
 
-    for (int i = PPUCTRL; i <= PPUDATA; i++) {
+    for (i = PPUCTRL; i <= PPUDATA; i++) {
         st->ppu_regs[i] = i;
         st->queue[i].cycle = 0;
         st->queue[i].next = NIL;
     }
 
+    for (uint16_t i = 0; i < 0x800; i++) {
+        st->ppu.vram[i] = VRAM_QUEUE_OFFSET + i;
+    }
+
+    for (uint16_t i = 0; i < 256; i++) {
+        st->ppu.oam[i] = OAM_QUEUE_OFFSET + i;
+    }
+
+    for (uint16_t i = 0; i < 0x20; i++) {
+        st->ppu.palette[i] = PALETTE_QUEUE_OFFSET + i;
+    }
+
     st->queue[PPUCTRL].data = 0x00;
     st->queue[PPUMASK].data = 0x00;
     st->queue[PPUSTATUS].data = 0xA0;
-    st->queue_top = 8;
+    st->queue_top = FINAL_OFFSET;
+
+    st->ppu.addr = 0x2000;
 }
 
 /* Executa o programa contido na rom apontada por cartridge
@@ -53,7 +68,7 @@ void execute(uint8_t *cartridge, uint32_t start_address) {
         cur += cycles;
 
         if (cur > CYCLES_PER_FRAME) {
-            ppu(&st);
+            ppu(&st, &mapper);
             cur = 0;
         }
     }

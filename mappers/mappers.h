@@ -17,6 +17,16 @@ typedef struct Mapper {
     MAPPER_BASE_FIELDS;
 } Mapper;
 
+inline __attribute__((always_inline)) uint16_t enqueue(Mapper *mapper, uint16_t addr, uint8_t value);
+
+inline __attribute__((always_inline)) uint8_t ppu_get(Mapper *mapper, uint16_t addr) {
+    return mapper->ppu_get(mapper, addr);
+}
+
+inline __attribute__((always_inline)) void ppu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
+    mapper->ppu_set(mapper, addr, value);
+}
+
 // Obtém o valor no endereço especificado
 inline __attribute__((always_inline)) uint8_t cpu_get(Mapper *mapper, uint16_t addr) {
     // RAM
@@ -49,15 +59,16 @@ inline __attribute__((always_inline)) void cpu_set(Mapper *mapper, uint16_t addr
 
     // PPU
     if (addr < 0x4000) {
-        // Insere o novo dado na fila
-        uint16_t old = mapper->st->ppu_regs[addr & 7];
-        uint16_t top = mapper->st->queue_top++;
-
-        mapper->st->queue[old].next = top;
-        mapper->st->queue[top].cycle = mapper->st->cycles;
-        mapper->st->queue[top].data = value;
-        mapper->st->queue[top].next = NIL;
-
+        switch (addr & 7) {
+            case PPUADDR:
+                mapper->st->ppu.addr <<= 8;
+                mapper->st->ppu.addr |= value;
+                break;
+            case PPUDATA:
+                ppu_set(mapper, mapper->st->ppu.addr, value);
+                break;
+        }
+        mapper->st->ppu_regs[addr & 7] = enqueue(mapper, mapper->st->ppu_regs[addr & 7], value);
         return;
     }
 
