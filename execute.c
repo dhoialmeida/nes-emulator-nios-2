@@ -13,10 +13,18 @@ void set_powerup_state(State *st) {
     st->y = 0;
     st->p = 0x24;
     st->sp = 0xFD;
+    st->cycles = 7;
 
-    st->ppu_regs[PPUCTRL] = 0x00;
-    st->ppu_regs[PPUMASK] = 0x00;
-    st->ppu_regs[PPUSTATUS] = 0xA0;
+    for (int i = PPUCTRL; i <= PPUDATA; i++) {
+        st->ppu_regs[i] = i;
+        st->queue[i].cycle = 0;
+        st->queue[i].next = NIL;
+    }
+
+    st->queue[PPUCTRL].data = 0x00;
+    st->queue[PPUMASK].data = 0x00;
+    st->queue[PPUSTATUS].data = 0xA0;
+    st->queue_top = 8;
 }
 
 /* Executa o programa contido na rom apontada por cartridge
@@ -27,7 +35,6 @@ Caso contrário, o ponto inicial de execução é dado pelo endereço de reset.
 void execute(uint8_t *cartridge, uint32_t start_address) {
     State st;
     MapperNROM mapper;
-    uint32_t total_cycles = 7;
     uint16_t cycles, cur = 0;
 
     set_powerup_state(&st);
@@ -41,8 +48,8 @@ void execute(uint8_t *cartridge, uint32_t start_address) {
     }
 
     while (1) {
-        cycles = cpu(&st, (Mapper *) &mapper, total_cycles);
-        total_cycles += cycles;
+        cycles = cpu(&st, (Mapper *) &mapper);
+        st.cycles += cycles;
         cur += cycles;
 
         if (cur > CYCLES_PER_FRAME) {

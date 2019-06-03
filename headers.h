@@ -28,12 +28,21 @@
 #define PPUADDR 0x6
 #define PPUDATA 0x7
 
+#define NIL 0xFFFF
+
 typedef struct State {
+    uint32_t cycles;
     uint16_t pc;
     uint8_t p, a, x, y, sp;
     uint8_t ppu_regs[8];
     uint8_t io_regs[26];
     uint8_t memory[0x800];
+    struct {
+        uint32_t cycle;
+        uint8_t data;
+        uint16_t next;
+    } queue[14500];
+    uint16_t queue_top;
     struct {
         uint8_t vram[0x800];
         uint8_t oam[256];
@@ -49,7 +58,7 @@ typedef struct PPU {
 #include "mappers/mappers.h"
 
 void execute(uint8_t *cartridge, uint32_t start_address);
-uint8_t cpu(State *st, Mapper *mapper, uint32_t cycles);
+uint8_t cpu(State *st, Mapper *mapper);
 void ppu(State *st);
 
 void graphics_init();

@@ -6,12 +6,12 @@
 #include "mappers/mappers.h"
 #include "operations.inc"
 
-uint8_t cpu(State *st, Mapper *mapper, uint32_t total_cycles) {
+uint8_t cpu(State *st, Mapper *mapper) {
     uint16_t result;
     uint16_t addr, eaddr;
     uint8_t opcode, value1, setCV = 0, setZN = 0, cyc = 0;
 
-    log("%04X | A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%-6d | ", st->pc, st->a, st->x, st->y, st->p, st->sp & 0xFF, total_cycles);
+    log("%04X | A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%-6d | ", st->pc, st->a, st->x, st->y, st->p, st->sp & 0xFF, st->cycles);
     OP_CODE(opcode); // OPCODES: http://6502.org/tutorials/6502opcodes.html#BRA
     switch (opcode) {  // MODE: Syntax
         //ADC

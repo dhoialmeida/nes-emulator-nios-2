@@ -26,7 +26,8 @@ inline __attribute__((always_inline)) uint8_t cpu_get(Mapper *mapper, uint16_t a
 
     // PPU
     if (addr < 0x4000) {
-        return mapper->st->ppu_regs[addr & 0x7];
+        // (ultimo da fila)
+        return mapper->st->queue[mapper->st->ppu_regs[addr & 0x7]].data;
     }
 
     // APU / IO
@@ -48,7 +49,15 @@ inline __attribute__((always_inline)) void cpu_set(Mapper *mapper, uint16_t addr
 
     // PPU
     if (addr < 0x4000) {
-        mapper->st->ppu_regs[addr & 0x7] = value;
+        // Insere o novo dado na fila
+        uint16_t old = mapper->st->ppu_regs[addr & 7];
+        uint16_t top = mapper->st->queue_top++;
+
+        mapper->st->queue[old].next = top;
+        mapper->st->queue[top].cycle = mapper->st->cycles;
+        mapper->st->queue[top].data = value;
+        mapper->st->queue[top].next = NIL;
+
         return;
     }
 
