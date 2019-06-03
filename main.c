@@ -26,7 +26,7 @@ int desktop_main(int argc, char *argv[]) {
         return 1;
     }
 
-    execute(jogo, 0xC000);
+    execute(jogo, 0x10000);
     return 1;
 }
 

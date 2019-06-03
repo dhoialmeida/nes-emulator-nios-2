@@ -59,7 +59,7 @@ inline __attribute__((always_inline)) void cpu_set(Mapper *mapper, uint16_t addr
 
     // PPU
     if (addr < 0x4000) {
-        switch (addr & 7) {
+        switch (addr & 0x7) {
             case PPUADDR:
                 mapper->st->ppu.addr <<= 8;
                 mapper->st->ppu.addr |= value;

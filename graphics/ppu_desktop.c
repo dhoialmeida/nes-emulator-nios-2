@@ -33,10 +33,10 @@ void draw_point(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b) {
 
 void graphics_update() {
     frame_count++;
+    SDL_RenderPresent(renderer);
     if (frame_count > 10) {
         sprintf(title, "%.1f fps", 10000.0 / (SDL_GetTicks() - last_time));
         SDL_SetWindowTitle(window, title);
-        SDL_RenderPresent(renderer);
 
         last_time = SDL_GetTicks();
         frame_count = 0;

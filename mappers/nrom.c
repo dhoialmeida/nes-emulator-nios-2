@@ -12,8 +12,11 @@ uint8_t nrom_cpu_get(Mapper *mapper, uint16_t addr) {
         return map->prg_ram[addr - 0x6000];
     }
 
-    // 0x8000 ~ 0xBFFF | 0xC000 ~ 0xFFFF = PRG_ROM, mirrored
-    return map->prg_rom[addr & 0x3FFF];
+    if (addr >= 0xC000) {
+        return map->prg_rom_C000[addr & map->mask];
+    }
+
+    return map->prg_rom_8000[addr & map->mask];
 }
 
 void nrom_cpu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
@@ -71,9 +74,11 @@ void nrom_ppu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
 void nrom_init(MapperNROM *mapper, State *st, uint8_t *cartridge) {
     mapper->st = st;
     mapper->cartridge = cartridge;
-    mapper->prg_rom = cartridge + 16;
-    mapper->chr_rom = mapper->prg_rom + cartridge[4]*0x4000;
+    mapper->prg_rom_C000 = cartridge + 16;
+    mapper->prg_rom_8000 = cartridge + 16 + 16384;
+    mapper->chr_rom = mapper->prg_rom_8000 + 32768;
     mapper->mirroring = cartridge[6] & 0x1;
+    mapper->mask = 0x7FFF;
 
     mapper->cpu_get = nrom_cpu_get;
     mapper->cpu_set = nrom_cpu_set;

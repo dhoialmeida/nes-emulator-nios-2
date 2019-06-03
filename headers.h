@@ -86,4 +86,6 @@ inline __attribute__((always_inline)) uint16_t enqueue(Mapper *mapper, uint16_t 
     return top;
 }
 
+void reset_queue(State *st);
+
 #endif
