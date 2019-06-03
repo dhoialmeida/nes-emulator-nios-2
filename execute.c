@@ -4,6 +4,8 @@
 #include "mappers/mappers.h"
 #include "mappers/nrom.h"
 
+#define CYCLES_PER_FRAME 29780
+
 // Altera o estado para o estado de power-up
 void set_powerup_state(State *st) {
     st->a = 0;
@@ -25,10 +27,12 @@ Caso contrário, o ponto inicial de execução é dado pelo endereço de reset.
 void execute(uint8_t *cartridge, uint32_t start_address) {
     State st;
     MapperNROM mapper;
-    uint32_t cycles = 7;
+    uint32_t total_cycles = 7;
+    uint16_t cycles, cur = 0;
 
     set_powerup_state(&st);
     nrom_init(&mapper, &st, cartridge);
+    graphics_init();
 
     if (start_address < 0x10000) {
         st.pc = start_address;
@@ -37,6 +41,15 @@ void execute(uint8_t *cartridge, uint32_t start_address) {
     }
 
     while (1) {
-        cycles = cpu(&st, (Mapper *) &mapper, cycles);
+        cycles = cpu(&st, (Mapper *) &mapper, total_cycles);
+        total_cycles += cycles;
+        cur += cycles;
+
+        if (cur > CYCLES_PER_FRAME) {
+            ppu(&st);
+            cur = 0;
+        }
     }
+
+    graphics_finish();
 }

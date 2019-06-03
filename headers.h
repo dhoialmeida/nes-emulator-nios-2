@@ -11,7 +11,12 @@
     #include <stdint.h>
 #endif
 
-#define log(...) printf(__VA_ARGS__)
+#ifndef DISABLE_LOG
+    #define log(...) printf(__VA_ARGS__)
+#else
+    #define log(...)
+#endif
+
 #define STACK_PAGE 0x100
 
 //PPU REGISTERS:
@@ -29,6 +34,11 @@ typedef struct State {
     uint8_t ppu_regs[8];
     uint8_t io_regs[26];
     uint8_t memory[0x800];
+    struct {
+        uint8_t vram[0x800];
+        uint8_t oam[256];
+        uint8_t pallete[0x20];
+    } ppu;
 } State;
 
 typedef struct PPU {
@@ -39,6 +49,12 @@ typedef struct PPU {
 #include "mappers/mappers.h"
 
 void execute(uint8_t *cartridge, uint32_t start_address);
-uint32_t cpu(State *st, Mapper *mapper, uint32_t cycles);
+uint8_t cpu(State *st, Mapper *mapper, uint32_t cycles);
+void ppu(State *st);
+
+void graphics_init();
+void draw_point(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b);
+void graphics_update();
+void graphics_finish();
 
 #endif
