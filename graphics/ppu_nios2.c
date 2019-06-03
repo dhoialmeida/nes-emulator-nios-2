@@ -3,6 +3,8 @@
 #define FRONT_BUFFER_ADDR 0x10003020;
 #define BACK_BUFFER_ADDR 0x10003024;
 
+uint8_t frame_count = 0;
+
 void clear_screen(uint16_t color){
 	volatile short int* px;
 	for (px = VIDEO_ADDR; px < VIDEO_ADDR + 2*512*240; px++) {
@@ -36,8 +38,16 @@ void draw_point(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b) {
     draw_pixel(x,y,map(r,g,b));
 }
 
+volatile int *buffer = 0x10003020;
+const int STATUS = 3;
+
 void graphics_update() {
+    frame_count++;
     
+    if(frame_count > 10){
+        //lcd_print("");
+        frame_count = 0;
+    }
 }
 
 void graphics_finish() {
