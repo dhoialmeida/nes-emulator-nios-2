@@ -1,5 +1,9 @@
+/* ppu_nios2.c - Implementação das primitivas gráficas para Nios II */
+
 #ifdef PLACA
-#include "../headers.h"
+
+#include "../util/types.h"
+
 #define VIDEO_ADDR 0x08000000
 #define FRONT_BUFFER_ADDR 0x10003020;
 #define BACK_BUFFER_ADDR 0x10003024;
@@ -54,4 +58,5 @@ void graphics_update() {
 void graphics_finish() {
     clear_screen(0x0000);
 }
+
 #endif

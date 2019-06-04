@@ -1,7 +1,13 @@
 /* nrom.c - Implementação do mapper NROM (mapper 0) */
 
 #include <stdio.h>
-#include "../headers.h"
+
+#include "../execution/state.h"
+#include "../graphics/ppu.h"
+#include "../util/log.h"
+#include "../util/queue.h"
+#include "../util/types.h"
+
 #include "nrom.h"
 
 uint8_t nrom_cpu_get(Mapper *mapper, uint16_t addr) {

@@ -2,8 +2,11 @@
 
 #include <stdio.h>
 
-#include "headers.h"
-#include "mappers/mappers.h"
+#include "../mappers/mappers.h"
+#include "../util/log.h"
+#include "../util/types.h"
+
+#include "cpu.h"
 #include "operations.inc"
 
 uint8_t cpu(State *st, Mapper *mapper) {

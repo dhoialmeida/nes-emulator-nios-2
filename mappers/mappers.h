@@ -1,23 +1,14 @@
 /* mappers.h - biblioteca base para mappers */
 
-#ifndef MAPPERS_LIB
-#define MAPPERS_LIB
+#ifndef MAPPERS_HEADER
+#define MAPPERS_HEADER
 
-// Atributos base para um Mapper
-#define MAPPER_BASE_FIELDS \
-    State *st; \
-    uint8_t *cartridge; \
-    uint8_t (*cpu_get) (struct Mapper *mapper, uint16_t addr); \
-    void (*cpu_set) (struct Mapper *mapper, uint16_t addr, uint8_t value); \
-    uint8_t (*ppu_get) (struct Mapper *mapper, uint16_t addr); \
-    void (*ppu_set) (struct Mapper *mapper, uint16_t addr, uint8_t value)
+#include "../execution/state.h"
+#include "../util/constants.h"
+#include "../util/queue.h"
+#include "../util/types.h"
 
-// Estrutura geral de um Mapper
-typedef struct Mapper {
-    MAPPER_BASE_FIELDS;
-} Mapper;
-
-inline __attribute__((always_inline)) uint16_t enqueue(Mapper *mapper, uint16_t addr, uint8_t value);
+#include "mapper_struct.h"
 
 inline __attribute__((always_inline)) uint8_t ppu_get(Mapper *mapper, uint16_t addr) {
     return mapper->ppu_get(mapper, addr);

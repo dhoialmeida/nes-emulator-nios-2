@@ -1,7 +1,11 @@
 /* ppu.c - Implementação da unidade de processamento de imagens */
 
-#include "../headers.h"
+#include "../execution/state.h"
 #include "../mappers/mappers.h"
+#include "../util/queue.h"
+#include "../util/types.h"
+
+#include "ppu.h"
 
 // Palete de cores (R0, G0, B0, R1, G1, B1...)
 static uint8_t palette[] = {

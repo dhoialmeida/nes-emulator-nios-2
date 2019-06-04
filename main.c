@@ -2,7 +2,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "headers.h"
+
+#include "execution/execute.h"
+#include "util/types.h"
+
 #define MAX_SIZE 100000
 
 size_t read_file(char *name, uint8_t *buffer, size_t size) {

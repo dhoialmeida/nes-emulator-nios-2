@@ -1,7 +1,11 @@
 /* ppu_desktop.c - Implementação das primitivas gráficas para desktop */
+
 #ifndef PLACA
+
 #include <stdio.h>
 #include <SDL2/SDL.h>
+
+#include "../util/types.h"
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;

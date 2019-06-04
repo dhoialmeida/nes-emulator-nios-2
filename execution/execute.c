@@ -1,10 +1,14 @@
-/* execute.c - funcção principal do emulador */
+/* execute.c - função principal do emulador */
 
-#include "headers.h"
-#include "mappers/mappers.h"
-#include "mappers/nrom.h"
+#include "../graphics/ppu.h"
+#include "../mappers/mappers.h"
+#include "../mappers/nrom.h"
+#include "../util/queue.h"
+#include "../util/types.h"
 
-#define CYCLES_PER_FRAME 29780
+#include "cpu.h"
+#include "execute.h"
+#include "state.h"
 
 // Altera o estado para o estado de power-up
 void set_powerup_state(State *st) {
@@ -41,40 +45,6 @@ void set_powerup_state(State *st) {
 
     st->ppu.addr = 0x2000;
     st->ppu.status_read = 0;
-}
-
-// "Reseta" a fila, descartando elementos antigos
-void reset_queue(State *st) {
-    int i;
-    for (i = PPUCTRL; i <= PPUDATA; i++) {
-        st->queue[PPU_REG_QUEUE_OFFSET + i] = st->queue[st->ppu_regs[i]];
-        st->queue[PPU_REG_QUEUE_OFFSET + i].cycle = 0;
-        st->queue[PPU_REG_QUEUE_OFFSET + i].next = NIL;
-        st->ppu_regs[i] = i;
-    }
-
-    for (uint16_t i = 0; i < 0x800; i++) {
-        st->queue[VRAM_QUEUE_OFFSET + i] = st->queue[st->ppu.vram[i]];
-        st->queue[VRAM_QUEUE_OFFSET + i].cycle = 0;
-        st->queue[VRAM_QUEUE_OFFSET + i].next = NIL;
-        st->ppu.vram[i] = VRAM_QUEUE_OFFSET + i;
-    }
-
-    for (uint16_t i = 0; i < 256; i++) {
-        st->queue[OAM_QUEUE_OFFSET + i] = st->queue[st->ppu.oam[i]];
-        st->queue[OAM_QUEUE_OFFSET + i].cycle = 0;
-        st->queue[OAM_QUEUE_OFFSET + i].next = NIL;
-        st->ppu.oam[i] = OAM_QUEUE_OFFSET + i;
-    }
-
-    for (uint16_t i = 0; i < 0x20; i++) {
-        st->queue[PALETTE_QUEUE_OFFSET + i] = st->queue[st->ppu.palette[i]];
-        st->queue[PALETTE_QUEUE_OFFSET + i].cycle = 0;
-        st->queue[PALETTE_QUEUE_OFFSET + i].next = NIL;
-        st->ppu.palette[i] = PALETTE_QUEUE_OFFSET + i;
-    }
-
-    st->queue_top = FINAL_OFFSET;
 }
 
 /* Executa o programa contido na rom apontada por cartridge

@@ -1,8 +1,11 @@
 /* nrom.h - Mapper NROM (mapper 0) */
 
-#ifndef MAPPER_NROM
-#define MAPPER_NROM
+#ifndef NROM_HEADER
+#define NROM_HEADER
 
+#include "../execution/state.h"
+#include "../graphics/ppu.h"
+#include "../util/types.h"
 #include "mappers.h"
 
 #define HORIZONTAL 0
