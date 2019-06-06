@@ -22,7 +22,7 @@ void graphics_init() {
 }
 
 void draw_pixel(uint16_t x, uint16_t y, uint16_t color){
-    volatile short int* px = VIDEO_ADDR + (x << 1) + (y << 10);
+    volatile short int* px = VIDEO_ADDR + x + (y << 9);
     *px = color;
 }
 
