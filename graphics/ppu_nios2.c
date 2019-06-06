@@ -49,8 +49,8 @@ const int STATUS = 3;
 void graphics_update() {
     frame_count++;
 
-    if(frame_count > 10){
-        //lcd_print("");
+    if(frame_count > 5){
+        printf("FRAME!\n");
         frame_count = 0;
     }
 }
