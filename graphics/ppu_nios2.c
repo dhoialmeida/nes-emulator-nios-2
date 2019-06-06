@@ -11,10 +11,10 @@
 uint8_t frame_count = 0;
 
 void clear_screen(uint16_t color){
-	volatile short int* px;
-	for (px = VIDEO_ADDR; px < VIDEO_ADDR + 2*512*240; px++) {
-		*px = color;
-	}
+    volatile short int* px;
+    for (px = VIDEO_ADDR; px < VIDEO_ADDR + 2*512*240; px++) {
+        *px = color;
+    }
 }
 
 void graphics_init() {
@@ -22,8 +22,8 @@ void graphics_init() {
 }
 
 void draw_pixel(uint16_t x, uint16_t y, uint16_t color){
-	volatile short int* px = VIDEO_ADDR + (x << 1) + (y << 10);
-	*px = color;
+    volatile short int* px = VIDEO_ADDR + (x << 1) + (y << 10);
+    *px = color;
 }
 
 uint16_t mapColor(uint8_t r, uint8_t g, uint8_t b){
@@ -39,7 +39,7 @@ uint16_t mapColor(uint8_t r, uint8_t g, uint8_t b){
 }
 
 void draw_point(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b) {
-	//TODO:upscale
+    //TODO:upscale
     draw_pixel(x,y,mapColor(r,g,b));
 }
 
