@@ -1,5 +1,6 @@
 /* mappers.c - biblioteca base para mappers */
 
+#include "../execution/controller.h"
 #include "../execution/state.h"
 #include "../util/constants.h"
 #include "../util/queue.h"
@@ -44,7 +45,19 @@ uint8_t cpu_get(Mapper *mapper, uint16_t addr) {
 
     // APU / IO
     if (addr < 0x4020) {
-        return mapper->st->io_regs[addr & 0xFF];
+        switch (addr) {
+        case JOYSTICK1:
+            return get_joystick(1, mapper->st, mapper);
+            break;
+
+        case JOYSTICK2:
+            return get_joystick(2, mapper->st, mapper);
+            break;
+
+        default:
+            return mapper->st->io_regs[addr & 0xFF];
+            break;
+        }
     }
 
     // Cartrige space
@@ -83,8 +96,17 @@ void cpu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
 
     // APU / IO
     if (addr < 0x4020) {
-        mapper->st->io_regs[addr & 0xFF] = value;
-        return;
+        switch (addr) {
+        case JOYSTICK1:
+            // TODO
+            return;
+        case JOYSTICK2:
+            // TODO
+            return;
+        default:
+            mapper->st->io_regs[addr & 0xFF] = value;
+            return;
+        }
     }
 
     // Cartrige space
