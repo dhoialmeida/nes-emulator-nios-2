@@ -127,10 +127,10 @@ uint8_t cpu(State *st, Mapper *mapper) {
         //BRK
         case 0x00: log("BRK");
             st->pc += 2;
-            SET_MEM_AT16(STACK_PAGE + st->sp - 1, st->pc);
+            SET_MEM_AT16(mapper, STACK_PAGE + st->sp - 1, st->pc);
             cpu_set(mapper, STACK_PAGE + st->sp - 2, st->p | 1 << RESERVED | 1 << BREAK);
             st->sp -= 3;
-            st->pc = MEM_AT16(0xFFFE);
+            st->pc = MEM_AT16(mapper, 0xFFFE);
             SET(BREAK, 1);
             cyc += 7;
             break;
@@ -310,7 +310,7 @@ uint8_t cpu(State *st, Mapper *mapper) {
         //JSR
         case 0x20: log("JSR ");
             OP_ABS(value1, 0, 0);
-            SET_MEM_AT16(STACK_PAGE + st->sp - 1, st->pc - 1);
+            SET_MEM_AT16(mapper, STACK_PAGE + st->sp - 1, st->pc - 1);
             st->sp -= 2;
             st->pc = eaddr;
             cyc += 6;
@@ -494,14 +494,14 @@ uint8_t cpu(State *st, Mapper *mapper) {
             st->p = cpu_get(mapper, STACK_PAGE + st->sp + 1);
             SET(BREAK, 0);
             SET(RESERVED, 1);
-            st->pc = MEM_AT16(STACK_PAGE + st->sp + 2);
+            st->pc = MEM_AT16(mapper, STACK_PAGE + st->sp + 2);
             st->sp += 3;
             cyc += 6;
             break;
 
         //RTS
         case 0x60: log("RTS");
-            st->pc = MEM_AT16(STACK_PAGE + st->sp + 1) + 1;
+            st->pc = MEM_AT16(mapper, STACK_PAGE + st->sp + 1) + 1;
             st->sp += 2;
             cyc += 6;
             break;

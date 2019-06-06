@@ -12,13 +12,6 @@ Variáveis externas utilizadas:
     cyc = contador de ciclos
 */
 
-// Obtém o valor de memória salvo no endereço addr (16 bits)
-#define MEM_AT16(addr) ((cpu_get(mapper, (addr)+1) << 8) + cpu_get(mapper, addr))
-// Altera o valor na memória salvo no endereço addr (16 bits)
-#define SET_MEM_AT16(addr, value) cpu_set(mapper, addr, (value)); cpu_set(mapper, addr+1, ((value) >> 8))
-
-// === Opcodes
-
 // Armazena próximo OPCODE em var
 #define OP_CODE(var) eaddr = st->pc; var = cpu_get(mapper, eaddr); st->pc++
 
@@ -36,7 +29,7 @@ Variáveis externas utilizadas:
     st->pc++
 
 // (endereçamento absoluto, com indice)
-#define OP_ABS(var, idx, crossAdd) eaddr = MEM_AT16(st->pc); \
+#define OP_ABS(var, idx, crossAdd) eaddr = MEM_AT16(mapper, st->pc); \
     log("$%04X, " #idx, eaddr); \
     result = eaddr; \
     eaddr = (eaddr + idx); \
@@ -47,7 +40,7 @@ Variáveis externas utilizadas:
 // (enderçamento indireto, addr = 16 bits)
 #define OP_INDIR(addr) do { \
     uint16_t high, low; \
-    eaddr = MEM_AT16(st->pc); \
+    eaddr = MEM_AT16(mapper, st->pc); \
     high = eaddr & 0xFF00; \
     low = (eaddr + 1) & 0xFF; \
     addr = cpu_get(mapper, eaddr) + (cpu_get(mapper, high + low) << 8); \

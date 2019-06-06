@@ -44,7 +44,9 @@ void set_powerup_state(State *st) {
     st->queue_top = FINAL_OFFSET;
 
     st->ppu.addr = 0x2000;
-    st->ppu.status_read = 0;
+    st->ppu.nmi_occurred = 0;
+    st->ppu.last_reg_written = 0;
+    st->ppu.already_set = 0;
 }
 
 /* Executa o programa contido na rom apontada por cartridge
@@ -55,7 +57,7 @@ Caso contrário, o ponto inicial de execução é dado pelo endereço de reset.
 void execute(uint8_t *cartridge, uint32_t start_address) {
     State st;
     MapperNROM mapper;
-    uint16_t cycles, cur = 0;
+    uint8_t cycles;
 
     set_powerup_state(&st);
     nrom_init(&mapper, &st, cartridge);
@@ -64,22 +66,40 @@ void execute(uint8_t *cartridge, uint32_t start_address) {
     if (start_address < 0x10000) {
         st.pc = start_address;
     } else {
-        st.pc = cpu_get((Mapper *) &mapper, 0xFFFD) << 8;
-        st.pc |= cpu_get((Mapper *) &mapper, 0xFFFC);
+        st.pc = MEM_AT16((Mapper *) &mapper, 0xFFFC);
     }
 
     while (1) {
         cycles = cpu(&st, (Mapper *) &mapper);
         st.cycles += cycles;
-        cur += cycles;
 
-        if (cur > CYCLES_PER_FRAME) {
+        handle_interrupts(&st, (Mapper *) &mapper);
+
+        if (st.cycles > CYCLES_PER_FRAME) {
             ppu(&st, (Mapper *) &mapper);
-            st.ppu.status_read = 0;
-            cur = 0;
+            st.ppu.already_set = 0;
             st.cycles = 0;
         }
     }
 
     graphics_finish();
+}
+
+void handle_interrupts(State *st, Mapper *mapper) {
+    if (!st->ppu.already_set && st->cycles > 27398) {
+        st->ppu.nmi_occurred = 1;
+        st->ppu.already_set = 1;
+
+        // Generates NMI interruption if NMI_OUTPUT is set
+        if (st->ppu.nmi_output) {
+            st->sp--;
+            SET_MEM_AT16(mapper, st->sp, st->pc);
+            st->sp--;
+            cpu_set(mapper, st->sp, st->p);
+            st->sp--;
+            st->pc = MEM_AT16(mapper, 0xFFFA);
+        }
+    } else if (st->cycles > 29895) {
+        st->ppu.nmi_occurred = 0;
+    }
 }

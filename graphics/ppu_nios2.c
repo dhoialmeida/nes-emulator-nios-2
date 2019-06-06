@@ -4,9 +4,9 @@
 
 #include "../util/types.h"
 
-#define VIDEO_ADDR 0x08000000
-#define FRONT_BUFFER_ADDR 0x10003020;
-#define BACK_BUFFER_ADDR 0x10003024;
+#define VIDEO_ADDR (volatile short int *) 0x08000000
+#define FRONT_BUFFER_ADDR (volatile int *) 0x10003020;
+#define BACK_BUFFER_ADDR (volatile int *) 0x10003024;
 
 uint8_t frame_count = 0;
 
@@ -17,7 +17,7 @@ void clear_screen(uint16_t color){
 	}
 }
 
-void graphcs_init() {
+void graphics_init() {
     clear_screen(0x0000);
 }
 
@@ -40,10 +40,10 @@ uint16_t mapColor(uint8_t r, uint8_t g, uint8_t b){
 
 void draw_point(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b) {
 	//TODO:upscale
-    draw_pixel(x,y,map(r,g,b));
+    draw_pixel(x,y,mapColor(r,g,b));
 }
 
-volatile int *buffer = 0x10003020;
+volatile int *buffer = (volatile int *) 0x10003020;
 const int STATUS = 3;
 
 void graphics_update() {
