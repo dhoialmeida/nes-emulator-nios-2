@@ -1,7 +1,6 @@
 /* mappers.h - biblioteca base para mappers */
 #include "../execution/state.h"
 #include "../util/constants.h"
-#include "../util/queue.h"
 #include "../util/types.h"
 
 #include "mapper_struct.h"

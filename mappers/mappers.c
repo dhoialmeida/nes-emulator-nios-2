@@ -3,7 +3,6 @@
 #include "../execution/controller.h"
 #include "../execution/state.h"
 #include "../util/constants.h"
-#include "../util/queue.h"
 #include "../util/types.h"
 
 #include "mapper_struct.h"
@@ -39,7 +38,7 @@ uint8_t cpu_get(Mapper *mapper, uint16_t addr) {
                 return ppu_get(mapper, mapper->st->ppu.addr);
                 break;
             default:
-                return mapper->st->queue[mapper->st->ppu_regs[addr & 0x7]].data;
+                return mapper->st->ppu_regs[addr & 0x7];
         }
     }
 
@@ -89,7 +88,7 @@ void cpu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
             case PPUCTRL:
                 mapper->st->ppu.nmi_output = (value >> 7);
             default:
-                mapper->st->ppu_regs[addr & 7] = enqueue(mapper, mapper->st->ppu_regs[addr & 7], value);
+                mapper->st->ppu_regs[addr & 7] = value;
         }
         return;
     }

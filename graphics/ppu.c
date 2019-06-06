@@ -2,7 +2,6 @@
 
 #include "../execution/state.h"
 #include "../mappers/mappers.h"
-#include "../util/queue.h"
 #include "../util/types.h"
 
 #include "ppu.h"
@@ -29,74 +28,74 @@ static uint8_t palette[] = {
 
 // Renderiza um frame
 void ppu(State *st, Mapper *mapper) {
-    uint16_t tile; // Número to tile atual
-    uint8_t tx, ty; // x e y to tile atual
+    uint16_t tile = 0; // Número to tile atual
+    uint8_t tx = 0, ty = 0; // x e y to tile atual
     uint8_t name_entry; // entrada na nametable
-    uint8_t attr; // atributo do bloco atual
+    uint8_t attr, attr_addr = 0; // atributo do bloco atual
     uint8_t color_set; // palete selecionado
     uint16_t pattern_addr; // endereço da pattern table
     uint8_t pattern_low; // parte baixa do pattern table
     uint8_t pattern_high; // parte alta do pattern table (chr)
     uint8_t color; // cor do pixel
 
-    // Colors: 2 (back ou front) X 4 (numero de palettes) X 4 (cores por palette)
-    uint8_t colors[2][4][4];
+    // Colors: 2 (back ou front) X 4 (numero de palettes) X 3 (cores por palette)
+    uint8_t colors[2][4][3];
 
-    reset_queue(st);
     for (uint16_t y = 0; y < 240; y++) {
-        for (uint16_t x = 0; x < 256; x++) {
-            if ((x & 0x7) == 0) {
-                // Calcula o tile e sua posição x y
-                tile = (y>>2) + (x & 0x7);
-                tx = (tile / 32) & 1;
-                ty = (tile % 32) & 1;
+        tile = (y >> 3) << 5;
+        for (uint16_t x = 0; x < 256; x += 8) {
+            // Obtém a entrada no nametable e atributos
+            name_entry = ppu_get(mapper, 0x2000 + tile);
+            attr_addr = ((y & 0x1F) >> 1) + (x >> 1);
+            attr = ppu_get(mapper, 0x23C0 + attr_addr);
 
-                // Obtém a entrada no nametable e atributos
-                name_entry = ppu_get(mapper, 0x2000 + tile);
-                attr = ppu_get(mapper, 0x23C0);
+            // Obtém a paleta de acordo com o quadrante do tile
+            if ((!tx) & (!ty)) {
+                // Top left
+                color_set = attr;
+            } else if (tx & (!ty)) {
+                // Top right
+                color_set = attr >> 2;
+            } else if ((!tx) & ty) {
+                // Bottom left
+                color_set = attr >> 4;
+            } else {
+                // Bottom right
+                color_set = attr >> 6;
+            }
+            color_set = color_set & 0x3;
 
-                // Obtém a paleta de acordo com o quadrante do tile
-                if ((!tx) & (!ty)) {
-                    // Top left
-                    color_set = attr;
-                } else if (tx & (!ty)) {
-                    // Top right
-                    color_set = attr >> 2;
-                } else if ((!tx) & ty) {
-                    // Bottom left
-                    color_set = attr >> 4;
-                } else {
-                    // Bottom right
-                    color_set = attr >> 6;
-                }
-                color_set = color_set & 0x3;
+            // Obtém os bits da tabela pattern (CHR)
+            pattern_addr = (name_entry << 4) | (x & 0x7);
+            pattern_low = ppu_get(mapper, pattern_addr);
+            pattern_high = ppu_get(mapper, pattern_addr + 8);
 
-                // Obtém os bits da tabela pattern (CHR)
-                pattern_addr = (name_entry << 4) | (x & 0x7);
-                pattern_low = ppu_get(mapper, pattern_addr);
-                pattern_high = ppu_get(mapper, pattern_addr + 8);
+            // Preenche colors com as cores na memória da PPU
+                for (uint8_t pal = 0; pal < 4; pal++)
+                    for (uint8_t col = 0; col < 3; col++) {
+                        colors[0][pal][col] = ppu_get(mapper, 0x3F01 + pal*3 + col);
+                    }
 
-                // Preenche colors com as cores na memória da PPU
-                for (uint8_t i = 0; i < 2; i++)
-                    for (uint8_t pal = 0; pal < 4; pal++)
-                        for (uint8_t col = 0; col < 4; col++) {
-                            colors[i][pal][col] = ppu_get(mapper, 0x3F01 + i*2*4 + pal*4 + col);
-                        }
+            for (uint8_t i = 0; i < 8; i++) {
+                // Obtém o número da cor através da pattern
+                color = (pattern_high >> 6) & 0x2;
+                color = color | (pattern_low >> 7);
+
+                // Obtém a cor da tabela de cores
+                color = colors[0][color_set][color];
+
+                // Desenha o pixel
+                draw_point(x, y, RED(color), GREEN(color), BLUE(color));
+
+                pattern_high <<= 1;
+                pattern_low <<= 1;
+                x++;
             }
 
-            // Obtém o número da cor através da pattern
-            color = (pattern_high >> 6) & 0x2;
-            color = color | (pattern_low >> 7);
-
-            // Obtém a cor da tabela de cores
-            color = colors[0][color_set][color];
-
-            // Desenha o pixel
-            draw_point(x, y, RED(color), GREEN(color), BLUE(color));
-
-            pattern_high <<= 1;
-            pattern_low <<= 1;
+            tile++;
+            tx = !tx;
         }
+        if ((y & 0x7) == 7) ty = !ty;
     }
 
     graphics_update();

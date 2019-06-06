@@ -5,7 +5,6 @@
 #include "../execution/state.h"
 #include "../graphics/ppu.h"
 #include "../util/log.h"
-#include "../util/queue.h"
 #include "../util/types.h"
 
 #include "nrom.h"
@@ -43,15 +42,15 @@ uint8_t nrom_ppu_get(Mapper *mapper, uint16_t addr) {
     }
 
     if (addr < 0x3F00) {
-        if (map->mirroring == VERTICAL) {
-            addr &= 0x7FF;
-        } else {
-            addr &= (addr & 0xBFF) | ((addr & 0x800) >> 1);
-        }
-        return map->st->queue[map->st->ppu.vram[addr]].data;
+        // if (map->mirroring == VERTICAL) {
+        //     addr &= 0x7FF;
+        // } else {
+        //     addr &= (addr & 0xBFF) | ((addr & 0x800) >> 1);
+        // }
+        return map->st->ppu.vram[addr - 0x2000];
     }
 
-    return map->st->queue[map->st->ppu.palette[addr & 0x1F]].data;
+    return map->st->ppu.palette[addr & 0x1F];
 }
 
 void nrom_ppu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
@@ -64,17 +63,17 @@ void nrom_ppu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
     }
 
     if (addr < 0x3F00) {
-        if (map->mirroring == VERTICAL) {
-            addr &= 0x7FF;
-        } else {
-            addr &= (addr & 0xBFF) | ((addr & 0x800) >> 1);
-        }
+        // if (map->mirroring == VERTICAL) {
+        //     addr &= 0x7FF;
+        // } else {
+        //     addr &= (addr & 0xBFF) | ((addr & 0x800) >> 1);
+        // }
 
-        map->st->ppu.vram[addr] = enqueue(mapper, map->st->ppu.vram[addr], value);
+        map->st->ppu.vram[addr - 0x2000] = value;
         return;
     }
 
-    map->st->ppu.palette[addr & 0x1F] = enqueue(mapper, map->st->ppu.palette[addr & 0x1F], value);
+    map->st->ppu.palette[addr & 0x1F] = value;
 }
 
 void nrom_init(MapperNROM *mapper, State *st, uint8_t *cartridge) {
@@ -88,6 +87,6 @@ void nrom_init(MapperNROM *mapper, State *st, uint8_t *cartridge) {
 
     mapper->cpu_get = nrom_cpu_get;
     mapper->cpu_set = nrom_cpu_set;
-    mapper->ppu_get = nrom_cpu_get;
+    mapper->ppu_get = nrom_ppu_get;
     mapper->ppu_set = nrom_ppu_set;
 }
