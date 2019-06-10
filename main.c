@@ -36,7 +36,7 @@ int desktop_main(int argc, char *argv[]) {
 void board_main() {
     uint8_t jogo[MAX_SIZE];
     printf("%p\n", jogo);
-    execute(jogo, 0xC000);
+    execute(jogo, 0x10000);
 }
 
 int main(int argc, char *argv[]) {
