@@ -81,7 +81,7 @@ void nrom_init(MapperNROM *mapper, State *st, uint8_t *cartridge) {
     mapper->cartridge = cartridge;
     mapper->prg_rom_C000 = cartridge + 16;
     mapper->prg_rom_8000 = cartridge + 16 + 16384;
-    mapper->chr_rom = mapper->prg_rom_8000 + 32768;
+    mapper->chr_rom = mapper->prg_rom_8000 + 16384;
     mapper->mirroring = cartridge[6] & 0x1;
     mapper->mask = 0x7FFF;
 

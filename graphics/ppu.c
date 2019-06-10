@@ -68,7 +68,7 @@ void ppu(State *st, Mapper *mapper) {
             color_set = color_set & 0x3;
 
             // Obtém os bits da tabela pattern (CHR)
-            pattern_addr = (name_entry << 4) | (y & 0x7);
+            pattern_addr = ((name_entry << 4) | (y & 0x7)) + 0x1000;
             pattern_low = ppu_get(mapper, pattern_addr);
             pattern_high = ppu_get(mapper, pattern_addr + 8);
 
