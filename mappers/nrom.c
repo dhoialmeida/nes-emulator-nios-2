@@ -58,7 +58,7 @@ void nrom_ppu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
 
     // 0x0000 ~ 0x1FFF => CHR-ROM
     if (addr < 0x2000) {
-        map->chr_rom[addr] = value;
+        log("!!! Tried to write to ROM!!!");
         return;
     }
 

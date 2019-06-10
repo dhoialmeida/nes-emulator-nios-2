@@ -42,12 +42,14 @@ void ppu(State *st, Mapper *mapper) {
     uint8_t colors[2][4][3];
 
     for (uint16_t y = 0; y < 240; y++) {
-        tile = (y >> 3) << 5;
-        for (uint16_t x = 0; x < 256; x += 8) {
+        tile = (y >> 3) << 5; // int(y / 8) * 32
+        ty = y & 16; // bit 4
+        for (uint16_t x = 0; x < 256;) {
             // Obtém a entrada no nametable e atributos
-            name_entry = ppu_get(mapper, 0x2000 + tile);
-            attr_addr = ((y & 0x1F) >> 1) + (x >> 1);
-            attr = ppu_get(mapper, 0x23C0 + attr_addr);
+            tx = x & 16; // bit 4
+            name_entry = st->ppu.vram[tile];
+            attr_addr = ((y >> 5) << 3) + (x >> 5); // int(y / 32) * 8 + int(x/32)
+            attr = st->ppu.vram[0x3C0 + attr_addr];
 
             // Obtém a paleta de acordo com o quadrante do tile
             if ((!tx) & (!ty)) {
@@ -66,15 +68,15 @@ void ppu(State *st, Mapper *mapper) {
             color_set = color_set & 0x3;
 
             // Obtém os bits da tabela pattern (CHR)
-            pattern_addr = (name_entry << 4) | (x & 0x7);
+            pattern_addr = (name_entry << 4) | (y & 0x7);
             pattern_low = ppu_get(mapper, pattern_addr);
             pattern_high = ppu_get(mapper, pattern_addr + 8);
 
             // Preenche colors com as cores na memória da PPU
-                for (uint8_t pal = 0; pal < 4; pal++)
-                    for (uint8_t col = 0; col < 3; col++) {
-                        colors[0][pal][col] = ppu_get(mapper, 0x3F01 + pal*3 + col);
-                    }
+            for (uint8_t pal = 0; pal < 4; pal++)
+                for (uint8_t col = 0; col < 3; col++) {
+                    colors[0][pal][col] = st->ppu.palette[1 + pal*4 + col];
+                }
 
             for (uint8_t i = 0; i < 8; i++) {
                 // Obtém o número da cor através da pattern
@@ -93,9 +95,7 @@ void ppu(State *st, Mapper *mapper) {
             }
 
             tile++;
-            tx = !tx;
         }
-        if ((y & 0x7) == 7) ty = !ty;
     }
 
     graphics_update();
