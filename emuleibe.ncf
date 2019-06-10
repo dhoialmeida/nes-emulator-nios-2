@@ -21,26 +21,15 @@
         <options>
             <source_files>
                 <source_file filepath="true">main.c</source_file>
-                <source_file filepath="true">execution\cpu.c</source_file>
-                <source_file filepath="true">execution\cpu.h</source_file>
-                <source_file filepath="true">execution\execute.c</source_file>
-                <source_file filepath="true">execution\execute.h</source_file>
-                <source_file filepath="true">execution\state.h</source_file>
-                <source_file filepath="true">graphics\ppu.c</source_file>
-                <source_file filepath="true">graphics\ppu.h</source_file>
-                <source_file filepath="true">graphics\ppu_nios2.c</source_file>
-                <source_file filepath="true">mappers\mapper_struct.h</source_file>
                 <source_file filepath="true">mappers\mappers.c</source_file>
-                <source_file filepath="true">mappers\mappers.h</source_file>
                 <source_file filepath="true">mappers\nrom.c</source_file>
-                <source_file filepath="true">mappers\nrom.h</source_file>
-                <source_file filepath="true">util\constants.h</source_file>
-                <source_file filepath="true">util\log.h</source_file>
-                <source_file filepath="true">util\queue.c</source_file>
-                <source_file filepath="true">util\queue.h</source_file>
-                <source_file filepath="true">util\types.h</source_file>
+                <source_file filepath="true">graphics\ppu.c</source_file>
+                <source_file filepath="true">graphics\ppu_nios2.c</source_file>
+                <source_file filepath="true">execution\controller.c</source_file>
+                <source_file filepath="true">execution\cpu.c</source_file>
+                <source_file filepath="true">execution\execute.c</source_file>
             </source_files>
-            <compiler_flags>-O1 -ffunction-sections -fverbose-asm -fno-inline -D PLACA -std=c99 -D DISABLELOG</compiler_flags>
+            <compiler_flags>-O1 -ffunction-sections -fverbose-asm -std=c99 -D PLACA -D DISABLE_LOG</compiler_flags>
             <emulate_unimpl_instructions>true</emulate_unimpl_instructions>
             <use_small_c_library>false</use_small_c_library>
         </options>
