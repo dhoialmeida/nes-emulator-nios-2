@@ -38,9 +38,6 @@ void ppu(State *st, Mapper *mapper) {
     uint8_t pattern_high; // parte alta do pattern table (chr)
     uint8_t color; // cor do pixel
 
-    // Colors: 2 (back ou front) X 4 (numero de palettes) X 3 (cores por palette)
-    uint8_t colors[2][4][3];
-
     for (uint16_t y = 0; y < 240; y++) {
         tile = (y >> 3) << 5; // int(y / 8) * 32
         ty = y & 16; // bit 4
@@ -72,19 +69,17 @@ void ppu(State *st, Mapper *mapper) {
             pattern_low = ppu_get(mapper, pattern_addr);
             pattern_high = ppu_get(mapper, pattern_addr + 8);
 
-            // Preenche colors com as cores na memória da PPU
-            for (uint8_t pal = 0; pal < 4; pal++)
-                for (uint8_t col = 0; col < 3; col++) {
-                    colors[0][pal][col] = st->ppu.palette[1 + pal*4 + col];
-                }
-
             for (uint8_t i = 0; i < 8; i++) {
                 // Obtém o número da cor através da pattern
                 color = (pattern_high >> 6) & 0x2;
                 color = color | (pattern_low >> 7);
 
                 // Obtém a cor da tabela de cores
-                color = colors[0][color_set][color];
+                if (color == 0) {
+                    color = st->ppu.palette[0];
+                } else {
+                    color = st->ppu.palette[1 + color_set*4 + color];
+                }
 
                 // Desenha o pixel
                 draw_point(x, y, RED(color), GREEN(color), BLUE(color));
