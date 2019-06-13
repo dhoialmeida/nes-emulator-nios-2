@@ -78,7 +78,7 @@ void ppu(State *st, Mapper *mapper) {
                 if (color == 0) {
                     color = st->ppu.palette[0];
                 } else {
-                    color = st->ppu.palette[1 + color_set*4 + color];
+                    color = st->ppu.palette[color_set*4 + color];
                 }
 
                 // Desenha o pixel

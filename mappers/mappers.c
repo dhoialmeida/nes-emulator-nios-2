@@ -83,10 +83,11 @@ void cpu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
                 break;
             case PPUDATA:
                 ppu_set(mapper, mapper->st->ppu.addr, value);
-                mapper->st->ppu.addr++;
+                mapper->st->ppu.addr += mapper->st->ppu.increment;
                 break;
             case PPUCTRL:
                 mapper->st->ppu.nmi_output = (value >> 7);
+                mapper->st->ppu.increment = (value & 4) ? 32 : 1;
             default:
                 mapper->st->ppu_regs[addr & 7] = value;
         }
