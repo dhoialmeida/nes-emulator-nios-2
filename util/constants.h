@@ -8,8 +8,10 @@
 #define PPUMASK 0x1
 #define PPUSTATUS 0x2
 #define OAMADDR 0x3
+#define OAMDATA 0x4
 #define PPUSCROLL 0x5
 #define PPUADDR 0x6
 #define PPUDATA 0x7
+#define OAMDMA 0x4014
 
 #endif

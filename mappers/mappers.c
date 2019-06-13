@@ -88,8 +88,15 @@ void cpu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
             case PPUCTRL:
                 mapper->st->ppu.nmi_output = (value >> 7);
                 mapper->st->ppu.increment = (value & 4) ? 32 : 1;
+                break;
+            case OAMADDR:
+                mapper->st->ppu.oam_addr = value;
+                break;
+            case OAMDATA:
+                mapper->st->ppu.oam[mapper->st->ppu.oam_addr] = value;
             default:
                 mapper->st->ppu_regs[addr & 7] = value;
+                break;
         }
         return;
     }
@@ -102,6 +109,12 @@ void cpu_set(Mapper *mapper, uint16_t addr, uint8_t value) {
             return;
         case JOYSTICK2:
             // TODO
+            return;
+        case OAMDMA:
+            for (uint16_t addr = (value << 8); addr < ((value+1) << 8); addr++) {
+                mapper->st->ppu.oam[(mapper->st->ppu.oam_addr++) & 0xFF] = cpu_get(mapper, addr);
+            }
+            mapper->st->cycles += 514;
             return;
         default:
             mapper->st->io_regs[addr & 0xFF] = value;

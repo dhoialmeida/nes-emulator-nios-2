@@ -26,6 +26,50 @@ static uint8_t palette[] = {
 #define GREEN(color) palette[(color)*3 + 1]
 #define BLUE(color) palette[(color)*3 + 2]
 
+void render_sprites(State *st, Mapper *mapper) {
+    uint16_t start_y, index, attr, start_x;
+    uint16_t pattern_low, pattern_high, color, color_set;
+    uint16_t pattern_addr;
+
+    for (uint16_t i = 0; i < 255;) {
+        start_y = st->ppu.oam[i++];
+        index = st->ppu.oam[i++];
+        attr = st->ppu.oam[i++];
+        start_x = st->ppu.oam[i++];
+
+        color_set = attr & 0x3;
+
+        if (start_y < 240) {
+            for (uint8_t y = start_y; (y < (start_y+8)) && (y < 240); y++) {
+                // Obtém os bits da tabela pattern (CHR)
+                pattern_addr = ((index << 4) | (y & 0x7));
+                pattern_low = ppu_get(mapper, pattern_addr);
+                pattern_high = ppu_get(mapper, pattern_addr + 8);
+
+                for (uint8_t x = start_x; (x < 255) && (x < start_x+8);) {
+                    // Obtém o número da cor através da pattern
+                    color = (pattern_high >> 6) & 0x2;
+                    color = color | (pattern_low >> 7);
+
+                    // Obtém a cor da tabela de cores
+                    if (color == 0) {
+                        color = st->ppu.palette[0];
+                    } else {
+                        color = st->ppu.palette[16 + color_set*4 + color];
+                    }
+
+                    // Desenha o pixel
+                    draw_point(x, y, RED(color), GREEN(color), BLUE(color));
+
+                    pattern_high <<= 1;
+                    pattern_low <<= 1;
+                    x++;
+                }
+            }
+        }
+    }
+}
+
 // Renderiza um frame
 void ppu(State *st, Mapper *mapper) {
     uint16_t tile = 0; // Número to tile atual
@@ -92,6 +136,6 @@ void ppu(State *st, Mapper *mapper) {
             tile++;
         }
     }
-
+    render_sprites(st, mapper);
     graphics_update();
 }
