@@ -22,6 +22,7 @@ void set_powerup_state(State *st) {
     st->ppu.nmi_occurred = 0;
     st->ppu.last_reg_written = 0;
     st->ppu.already_set = 0;
+    st->ppu.increment = 1;
 }
 
 /* Executa o programa contido na rom apontada por cartridge

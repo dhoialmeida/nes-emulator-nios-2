@@ -22,6 +22,7 @@ typedef struct State {
         uint8_t nmi_occurred;
         uint8_t nmi_output;
         uint8_t last_reg_written;
+        uint8_t increment;
     } ppu;
 } State;
 #endif
