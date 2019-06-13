@@ -37,6 +37,7 @@ void render_sprites(State *st, Mapper *mapper) {
     uint16_t start_y, index, attr, start_x;
     uint16_t pattern_low, pattern_high, color, color_set;
     uint16_t pattern_addr;
+    uint8_t palette_index;
 
     for (uint16_t i = 0; i < 255;) {
         start_y = st->ppu.oam[i++];
@@ -49,7 +50,7 @@ void render_sprites(State *st, Mapper *mapper) {
         if (start_y < 240) {
             for (uint8_t y = start_y; (y < (start_y+8)) && (y < 240); y++) {
                 // Obtém os bits da tabela pattern (CHR)
-                pattern_addr = ((index << 4) | (y & 0x7));
+                pattern_addr = ((index << 4) | ((y - start_y) & 0x7));
                 pattern_low = ppu_get(mapper, pattern_addr);
                 pattern_high = ppu_get(mapper, pattern_addr + 8);
 
@@ -65,7 +66,8 @@ void render_sprites(State *st, Mapper *mapper) {
 
                     // Obtém a cor da tabela de cores
                     if (color != 0) {
-                        color = st->ppu.palette[16 + color_set*4 + color];
+                        palette_index = 16 + color_set*4 + color;
+                        color = st->ppu.palette[palette_index];
                         // Desenha o pixel
                         draw_point(x, y, RED(color), GREEN(color), BLUE(color));
                     }

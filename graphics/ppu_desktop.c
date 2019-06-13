@@ -18,7 +18,7 @@ void graphics_init() {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     }
 
-    window = SDL_CreateWindow("Update 0",  SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256, 240, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Update 0",  SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 512, 480, SDL_WINDOW_SHOWN);
 
     if (window == NULL) {
         SDL_Quit();
@@ -32,7 +32,10 @@ void graphics_init() {
 
 void draw_point(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b) {
     SDL_SetRenderDrawColor(renderer, r, g, b, 0xFF);
-    SDL_RenderDrawPoint(renderer, x, y);
+    SDL_RenderDrawPoint(renderer, x*2, y*2);
+    SDL_RenderDrawPoint(renderer, x*2+1, y*2);
+    SDL_RenderDrawPoint(renderer, x*2, y*2+1);
+    SDL_RenderDrawPoint(renderer, x*2+1, y*2+1);
 }
 
 void graphics_update() {
