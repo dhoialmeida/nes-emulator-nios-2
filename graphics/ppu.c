@@ -52,14 +52,11 @@ void render_sprites(State *st, Mapper *mapper) {
                     color = color | (pattern_low >> 7);
 
                     // Obtém a cor da tabela de cores
-                    if (color == 0) {
-                        color = st->ppu.palette[0];
-                    } else {
+                    if (color != 0) {
                         color = st->ppu.palette[16 + color_set*4 + color];
+                        // Desenha o pixel
+                        draw_point(x, y, RED(color), GREEN(color), BLUE(color));
                     }
-
-                    // Desenha o pixel
-                    draw_point(x, y, RED(color), GREEN(color), BLUE(color));
 
                     pattern_high <<= 1;
                     pattern_low <<= 1;
