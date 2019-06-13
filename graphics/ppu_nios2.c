@@ -2,27 +2,31 @@
 
 #ifdef PLACA
 
+#include <stdio.h>
 #include "../util/types.h"
 
-#define VIDEO_ADDR (volatile short int *) 0x08000000
-#define FRONT_BUFFER_ADDR (volatile int *) 0x10003020;
-#define BACK_BUFFER_ADDR (volatile int *) 0x10003024;
+#define FRONT_BUFFER_ADDR (volatile int *) 0x10003020
+#define BACK_BUFFER_ADDR (volatile int *) 0x10003024
 
 uint8_t frame_count = 0;
 
+volatile short int *front = (volatile short int *) 0x08000000;
+volatile short int *back = (volatile short int *) 0x08040000;
+
 void clear_screen(uint16_t color){
     volatile short int* px;
-    for (px = VIDEO_ADDR; px < VIDEO_ADDR + 2*512*240; px++) {
+    for (px = back; px < back + 2*512*240; px++) {
         *px = color;
     }
 }
 
 void graphics_init() {
+    *(BACK_BUFFER_ADDR) = 0x08040000;
     clear_screen(0x0000);
 }
 
 void draw_pixel(uint16_t x, uint16_t y, uint16_t color){
-    volatile short int* px = 30 + VIDEO_ADDR + x + (y << 9);
+    volatile short int* px = 30 + back + x + (y << 9);
     *px = color;
 }
 
@@ -43,9 +47,6 @@ void draw_point(uint16_t x, uint16_t y, uint8_t r, uint8_t g, uint8_t b) {
     draw_pixel(x,y,mapColor(r,g,b));
 }
 
-volatile int *buffer = (volatile int *) 0x10003020;
-const int STATUS = 3;
-
 void graphics_update() {
     frame_count++;
 
@@ -53,6 +54,15 @@ void graphics_update() {
         printf("FRAME!\n");
         frame_count = 0;
     }
+
+    volatile int *tmp = (volatile int *) front;
+    front = back;
+    back = (volatile short int *) tmp;
+
+    tmp = (volatile int *) 0x10003020;
+    *tmp = 1;
+    tmp = (volatile int *) 0x1000302C;
+    while (((*tmp) & 0x1) != 0);
 }
 
 void graphics_finish() {
