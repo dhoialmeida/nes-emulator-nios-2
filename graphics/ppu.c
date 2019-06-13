@@ -26,6 +26,13 @@ static uint8_t palette[] = {
 #define GREEN(color) palette[(color)*3 + 1]
 #define BLUE(color) palette[(color)*3 + 2]
 
+uint8_t reverse_bits(uint8_t x){
+    x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1));
+    x = (((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2));
+    x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
+    return x;
+}
+
 void render_sprites(State *st, Mapper *mapper) {
     uint16_t start_y, index, attr, start_x;
     uint16_t pattern_low, pattern_high, color, color_set;
@@ -45,6 +52,11 @@ void render_sprites(State *st, Mapper *mapper) {
                 pattern_addr = ((index << 4) | (y & 0x7));
                 pattern_low = ppu_get(mapper, pattern_addr);
                 pattern_high = ppu_get(mapper, pattern_addr + 8);
+
+                if (attr & 64) {
+                    pattern_high = reverse_bits(pattern_high);
+                    pattern_low = reverse_bits(pattern_low);
+                }
 
                 for (uint8_t x = start_x; (x < 255) && (x < start_x+8);) {
                     // Obtém o número da cor através da pattern
